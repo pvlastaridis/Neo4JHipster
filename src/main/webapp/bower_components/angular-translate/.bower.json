@@ -10,6 +10,6 @@
     "commit": "21e6f3f41d53a53b627f3947b8e17dfb2ba26a74"
   },
   "_source": "git://github.com/PascalPrecht/bower-angular-translate.git",
-  "_target": "~2.2.0",
+  "_target": "2.2.0",
   "_originalSource": "angular-translate"
 }

@@ -2,13 +2,13 @@
 
 /* Controllers */
 
-jhipsterApp.controller('MainController', function ($scope) {
+mongojhipApp.controller('MainController', function ($scope) {
     });
 
-jhipsterApp.controller('AdminController', function ($scope) {
+mongojhipApp.controller('AdminController', function ($scope) {
     });
 
-jhipsterApp.controller('LanguageController', function ($scope, $translate, LanguageService) {
+mongojhipApp.controller('LanguageController', function ($scope, $translate, LanguageService) {
         $scope.changeLanguage = function (languageKey) {
             $translate.use(languageKey);
 
@@ -22,11 +22,11 @@ jhipsterApp.controller('LanguageController', function ($scope, $translate, Langu
         });
     });
 
-jhipsterApp.controller('MenuController', function ($scope) {
+mongojhipApp.controller('MenuController', function ($scope) {
     });
 
-jhipsterApp.controller('LoginController', function ($scope, $location, AuthenticationSharedService) {
-        $scope.rememberMe = false;
+mongojhipApp.controller('LoginController', function ($scope, $location, AuthenticationSharedService) {
+        $scope.rememberMe = true;
         $scope.login = function () {
             AuthenticationSharedService.login({
                 username: $scope.username,
@@ -36,11 +36,11 @@ jhipsterApp.controller('LoginController', function ($scope, $location, Authentic
         }
     });
 
-jhipsterApp.controller('LogoutController', function ($location, AuthenticationSharedService) {
+mongojhipApp.controller('LogoutController', function ($location, AuthenticationSharedService) {
         AuthenticationSharedService.logout();
     });
 
-jhipsterApp.controller('SettingsController', function ($scope, Account) {
+mongojhipApp.controller('SettingsController', function ($scope, Account) {
         $scope.success = null;
         $scope.error = null;
         $scope.settingsAccount = Account.get();
@@ -59,7 +59,7 @@ jhipsterApp.controller('SettingsController', function ($scope, Account) {
         };
     });
 
-jhipsterApp.controller('RegisterController', function ($scope, $translate, Register) {
+mongojhipApp.controller('RegisterController', function ($scope, $translate, Register) {
         $scope.success = null;
         $scope.error = null;
         $scope.doNotMatch = null;
@@ -91,7 +91,7 @@ jhipsterApp.controller('RegisterController', function ($scope, $translate, Regis
         }
     });
 
-jhipsterApp.controller('ActivationController', function ($scope, $routeParams, Activate) {
+mongojhipApp.controller('ActivationController', function ($scope, $routeParams, Activate) {
         Activate.get({key: $routeParams.key},
             function (value, responseHeaders) {
                 $scope.error = null;
@@ -103,7 +103,7 @@ jhipsterApp.controller('ActivationController', function ($scope, $routeParams, A
             });
     });
 
-jhipsterApp.controller('PasswordController', function ($scope, Password) {
+mongojhipApp.controller('PasswordController', function ($scope, Password) {
         $scope.success = null;
         $scope.error = null;
         $scope.doNotMatch = null;
@@ -125,7 +125,7 @@ jhipsterApp.controller('PasswordController', function ($scope, Password) {
         };
     });
 
-jhipsterApp.controller('SessionsController', function ($scope, resolvedSessions, Sessions) {
+mongojhipApp.controller('SessionsController', function ($scope, resolvedSessions, Sessions) {
         $scope.success = null;
         $scope.error = null;
         $scope.sessions = resolvedSessions;
@@ -143,41 +143,68 @@ jhipsterApp.controller('SessionsController', function ($scope, resolvedSessions,
         };
     });
 
- jhipsterApp.controller('MetricsController', function ($scope, MetricsService, HealthCheckService, ThreadDumpService) {
+ mongojhipApp.controller('HealthController', function ($scope, HealthCheckService) {
+     $scope.updatingHealth = true;
+
+     $scope.refresh = function() {
+         $scope.updatingHealth = true;
+         HealthCheckService.check().then(function(promise) {
+             $scope.healthCheck = promise;
+             $scope.updatingHealth = false;
+         },function(promise) {
+             $scope.healthCheck = promise.data;
+             $scope.updatingHealth = false;
+         });
+     }
+
+     $scope.refresh();
+
+     $scope.getLabelClass = function(statusState) {
+         if (statusState == 'UP') {
+             return "label-success";
+         } else {
+             return "label-danger";
+         }
+     }
+ });
+
+mongojhipApp.controller('MetricsController', function ($scope, MetricsService, HealthCheckService, ThreadDumpService) {
+        $scope.metrics = {};
+		$scope.updatingMetrics = true;
 
         $scope.refresh = function() {
-            HealthCheckService.check().then(function(promise) {
-                $scope.healthCheck = promise.data;
-            },function(promise) {
-                $scope.healthCheck = promise.data;
-            });
-
-            $scope.metrics = MetricsService.get();
-
-            $scope.metrics.$get({}, function(items) {
-
-                $scope.servicesStats = {};
-                $scope.cachesStats = {};
-                angular.forEach(items.timers, function(value, key) {
-                    if (key.indexOf("web.rest") != -1 || key.indexOf("service") != -1) {
-                        $scope.servicesStats[key] = value;
-                    }
-
-                    if (key.indexOf("net.sf.ehcache.Cache") != -1) {
-                        // remove gets or puts
-                        var index = key.lastIndexOf(".");
-                        var newKey = key.substr(0, index);
-
-                        // Keep the name of the domain
-                        index = newKey.lastIndexOf(".");
-                        $scope.cachesStats[newKey] = {
-                            'name': newKey.substr(index + 1),
-                            'value': value
-                        };
-                    }
-                });
-            });
+			$scope.updatingMetrics = true;
+			MetricsService.get().then(function(promise) {
+        		$scope.metrics = promise;
+				$scope.updatingMetrics = false;
+        	},function(promise) {
+        		$scope.metrics = promise.data;
+				$scope.updatingMetrics = false;
+        	});
         };
+
+		$scope.$watch('metrics', function(newValue, oldValue) {
+			$scope.servicesStats = {};
+            $scope.cachesStats = {};
+            angular.forEach(newValue.timers, function(value, key) {
+                if (key.indexOf("web.rest") != -1 || key.indexOf("service") != -1) {
+                    $scope.servicesStats[key] = value;
+                }
+
+                if (key.indexOf("net.sf.ehcache.Cache") != -1) {
+                    // remove gets or puts
+                    var index = key.lastIndexOf(".");
+                    var newKey = key.substr(0, index);
+
+                    // Keep the name of the domain
+                    index = newKey.lastIndexOf(".");
+                    $scope.cachesStats[newKey] = {
+                        'name': newKey.substr(index + 1),
+                        'value': value
+                    };
+                };
+            });
+		});
 
         $scope.refresh();
 
@@ -221,7 +248,7 @@ jhipsterApp.controller('SessionsController', function ($scope, resolvedSessions,
         };
     });
 
-jhipsterApp.controller('LogsController', function ($scope, resolvedLogs, LogsService) {
+mongojhipApp.controller('LogsController', function ($scope, resolvedLogs, LogsService) {
         $scope.loggers = resolvedLogs;
 
         $scope.changeLevel = function (name, level) {
@@ -231,7 +258,7 @@ jhipsterApp.controller('LogsController', function ($scope, resolvedLogs, LogsSer
         }
     });
 
-jhipsterApp.controller('AuditsController', function ($scope, $translate, $filter, AuditsService) {
+mongojhipApp.controller('AuditsController', function ($scope, $translate, $filter, AuditsService) {
         $scope.onChangeDate = function() {
             AuditsService.findByDates($scope.fromDate, $scope.toDate).then(function(data){
                 $scope.audits = data;
@@ -265,4 +292,3 @@ jhipsterApp.controller('AuditsController', function ($scope, $translate, $filter
             $scope.audits = data;
         });
     });
-

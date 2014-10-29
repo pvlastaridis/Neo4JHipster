@@ -6,7 +6,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>jhipster</title>
+        <title>mongojhip</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="styles/main.css">
         <!-- endbuild -->
     </head>
-    <body ng-app="jhipsterApp" ng-controller="MainController">
+    <body ng-app="mongojhipApp" ng-controller="MainController">
         <!--[if lt IE 10]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
@@ -29,7 +29,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                  <a class="navbar-brand" href="#"><span translate="global.title">jhipster</span></a>
+                  <a class="navbar-brand" href="#"><span translate="global.title">mongojhip</span></a>
                 </div>
                 <div class="collapse navbar-collapse" id="navbar-collapse" ng-switch="authenticated">
                     <ul class="nav navbar-nav nav-pills navbar-right">
@@ -38,6 +38,20 @@
                                 <span class="glyphicon glyphicon-home"></span>
                                 <span translate="global.menu.home">Home</span>
                             </a>
+                        </li>
+                        <li ng-switch-when="true" class="dropdown pointer">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:;">
+                                <span>
+                                    <span class="glyphicon glyphicon-th-list"></span>
+                                    <span class="hidden-tablet" translate="global.menu.entities.main">
+                                        Entities
+                                    </span>
+                                    <b class="caret"></b>
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu" ng-controller="MenuController">
+                                <!-- JHipster will add entities to the menu here -->
+                            </ul>
                         </li>
                         <li class="dropdown pointer">
                             <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:;">
@@ -76,6 +90,8 @@
                             <ul class="dropdown-menu">
                                 <li><a href="#/metrics"><span class="glyphicon glyphicon-dashboard"></span>
                                     &#xA0;<span translate="global.menu.account.metrics">Metrics</span></a></li>
+                                <li><a href="#/health"><span class="glyphicon glyphicon-heart"></span>
+                                    &#xA0;<span translate="global.menu.account.health">Health</span></a></li>
                                 <li><a href="#/audits"><span class="glyphicon glyphicon-bell"></span>
                                     &#xA0;<span translate="global.menu.account.audits">Audits</span></a></li>
                                 <li><a href="#/logs"><span class="glyphicon glyphicon-tasks"></span>

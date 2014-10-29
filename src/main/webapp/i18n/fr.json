@@ -1,9 +1,12 @@
 {
     "global": {
-        "title": "jhipster",
+        "title": "mongojhip",
         "browsehappy": "Vous utilisez un <strong>ancien</strong> navigateur. Veuillez <a href=\"http://browsehappy.com/?locale=fr\">mettre à jour votre navigateur</a> pour une meilleure expérience.",
         "menu": {
             "home": "Accueil",
+            "entities": {
+                "main": "Entities"
+            },
             "account": {
                 "main": "Compte",
                 "settings": "Profil",
@@ -11,6 +14,7 @@
                 "sessions": "Sessions",
                 "tracker": "Suivi des utilisateurs",
                 "metrics": "Métriques",
+                "health": "Diagnostics",
                 "logs": "Logs",
                 "audits": "Audits",
                 "login": "S'authentifier",
@@ -179,12 +183,7 @@
     "metrics": {
         "title": "Métriques de l'application",
         "refresh.button": "Rafraichir",
-        "health": {
-            "title": "Diagnostics",
-            "database": "Base de données: ",
-            "email": "Email: ",
-            "stacktrace": "Stacktrace"
-        },
+        "updating": "Mise à jour...",
         "jvm": {
             "title": "Métriques de la JVM",
             "memory": {
@@ -259,6 +258,24 @@
             "misses": "Données non existantes",
             "evictioncount": "Nombre de suppressions",
             "mean": "Temps de réponse (ms)"
+        }
+    },
+    "health": {
+        "title": "Diagnostics",
+        "refresh.button": "Rafraichir",
+        "indicator": {
+            "db": "Base de données",
+            "mail": "Email",
+            "mongo": "Mongo DB"
+        },
+        "stacktrace": "Stacktrace",
+        "table": {
+            "service": "Nom du service",
+            "status": "Etat"
+        },
+        "status": {
+            "UP": "DISPONIBLE",
+            "DOWN": "HORS SERVICE"
         }
     },
     "logs": {

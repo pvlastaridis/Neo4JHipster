@@ -1,9 +1,12 @@
 {
     "global": {
-        "title": "jhipster",
+        "title": "mongojhip",
         "browsehappy": "Sie benutzen einen <strong>veralteten</strong> Browser. Bitte <a href=\"http://browsehappy.com/?locale=de/\">aktualisieren Sie Ihren Browser</a>, um die Benutzerfreundlichkeit zu erhöhen.",
         "menu": {
             "home": "Startseite",
+            "entities": {
+                "main": "Entities"
+            },
             "account": {
                 "main": "Zugang",
                 "settings": "Einstellungen",
@@ -11,6 +14,7 @@
                 "sessions": "Sitzungen",
                 "tracker": "User tracker",
                 "metrics": "Metriken",
+                "health": "Heath",
                 "logs": "Protokoll",
                 "audits": "Audits",
                 "login": "Anmelden",
@@ -180,12 +184,7 @@
     "metrics": {
         "title": "Anwendungs-Metriken",
         "refresh.button": "Aktualisieren",
-        "health": {
-            "title": "Heath checks",
-            "database": "Datenbank: ",
-            "email": "Email: ",
-            "stacktrace": "Stacktrace"
-        },
+        "updating": "Aktualisierung...",
         "jvm": {
             "title": "JVM Metriken",
             "memory": {
@@ -260,6 +259,24 @@
             "misses": "Keine Treffer",
             "evictioncount": "Anzahl entfernter Objekte",
             "mean": "Durchschnittliche Zugriffszeit (ms)"
+        }
+    },
+    "health": {
+        "title": "Heath checks",
+        "refresh.button": "Aktualisieren",
+        "stacktrace": "Stacktrace",
+        "indicator": {
+            "db": "Datenbank",
+            "mail": "Email",
+            "mongo": "Mongo"
+        },
+        "table": {
+            "service": "Dienst Name",
+            "status": "Status"
+        },
+        "status": {
+            "UP": "UP",
+            "DOWN": "DOWN"
         }
     },
     "logs": {

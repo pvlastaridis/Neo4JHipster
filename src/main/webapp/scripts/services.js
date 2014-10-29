@@ -2,7 +2,7 @@
 
 /* Services */
 
-jhipsterApp.factory('LanguageService', function ($http, $translate, LANGUAGES) {
+mongojhipApp.factory('LanguageService', function ($http, $translate, LANGUAGES) {
         return {
             getBy: function(language) {
                 if (language == undefined) {
@@ -20,40 +20,45 @@ jhipsterApp.factory('LanguageService', function ($http, $translate, LANGUAGES) {
         };
     });
 
-jhipsterApp.factory('Register', function ($resource) {
+mongojhipApp.factory('Register', function ($resource) {
         return $resource('app/rest/register', {}, {
         });
     });
 
-jhipsterApp.factory('Activate', function ($resource) {
+mongojhipApp.factory('Activate', function ($resource) {
         return $resource('app/rest/activate', {}, {
             'get': { method: 'GET', params: {}, isArray: false}
         });
     });
 
-jhipsterApp.factory('Account', function ($resource) {
+mongojhipApp.factory('Account', function ($resource) {
         return $resource('app/rest/account', {}, {
         });
     });
 
-jhipsterApp.factory('Password', function ($resource) {
+mongojhipApp.factory('Password', function ($resource) {
         return $resource('app/rest/account/change_password', {}, {
         });
     });
 
-jhipsterApp.factory('Sessions', function ($resource) {
+mongojhipApp.factory('Sessions', function ($resource) {
         return $resource('app/rest/account/sessions/:series', {}, {
             'get': { method: 'GET', isArray: true}
         });
     });
 
-jhipsterApp.factory('MetricsService',function ($resource) {
-        return $resource('metrics/metrics', {}, {
-            'get': { method: 'GET'}
-        });
+mongojhipApp.factory('MetricsService',function ($http) {
+    		return {
+            get: function() {
+                var promise = $http.get('metrics/metrics').then(function(response){
+                    return response.data;
+                });
+                return promise;
+            }
+        };
     });
 
-jhipsterApp.factory('ThreadDumpService', function ($http) {
+mongojhipApp.factory('ThreadDumpService', function ($http) {
         return {
             dump: function() {
                 var promise = $http.get('dump').then(function(response){
@@ -64,7 +69,7 @@ jhipsterApp.factory('ThreadDumpService', function ($http) {
         };
     });
 
-jhipsterApp.factory('HealthCheckService', function ($rootScope, $http) {
+mongojhipApp.factory('HealthCheckService', function ($rootScope, $http) {
         return {
             check: function() {
                 var promise = $http.get('health').then(function(response){
@@ -75,14 +80,14 @@ jhipsterApp.factory('HealthCheckService', function ($rootScope, $http) {
         };
     });
 
-jhipsterApp.factory('LogsService', function ($resource) {
+mongojhipApp.factory('LogsService', function ($resource) {
         return $resource('app/rest/logs', {}, {
             'findAll': { method: 'GET', isArray: true},
             'changeLevel':  { method: 'PUT'}
         });
     });
 
-jhipsterApp.factory('AuditsService', function ($http) {
+mongojhipApp.factory('AuditsService', function ($http) {
         return {
             findAll: function() {
                 var promise = $http.get('app/rest/audits/all').then(function (response) {
@@ -99,7 +104,7 @@ jhipsterApp.factory('AuditsService', function ($http) {
         }
     });
 
-jhipsterApp.factory('Session', function () {
+mongojhipApp.factory('Session', function () {
         this.create = function (login, firstName, lastName, email, userRoles) {
             this.login = login;
             this.firstName = firstName;
@@ -117,10 +122,10 @@ jhipsterApp.factory('Session', function () {
         return this;
     });
 
-jhipsterApp.factory('AuthenticationSharedService', function ($rootScope, $http, authService, Session, Account) {
+mongojhipApp.factory('AuthenticationSharedService', function ($rootScope, $http, authService, Session, Account) {
         return {
             login: function (param) {
-                var data ="j_username=" + param.username +"&j_password=" + param.password +"&_spring_security_remember_me=" + param.rememberMe +"&submit=Login";
+                var data ="j_username=" + encodeURIComponent(param.username) +"&j_password=" + encodeURIComponent(param.password) +"&_spring_security_remember_me=" + param.rememberMe +"&submit=Login";
                 $http.post('app/authentication', data, {
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
@@ -146,19 +151,16 @@ jhipsterApp.factory('AuthenticationSharedService', function ($rootScope, $http, 
                         Account.get(function(data) {
                             Session.create(data.login, data.firstName, data.lastName, data.email, data.roles);
                             $rootScope.account = Session;
-
-                            if (!$rootScope.isAuthorized(authorizedRoles)) {
-                                event.preventDefault();
-                                // user is not allowed
-                                $rootScope.$broadcast("event:auth-notAuthorized");
-                            }
-
                             $rootScope.authenticated = true;
                         });
                     }
                     $rootScope.authenticated = !!Session.login;
                 }).error(function (data, status, headers, config) {
                     $rootScope.authenticated = false;
+
+                    if (!$rootScope.isAuthorized(authorizedRoles)) {
+                        $rootScope.$broadcast('event:auth-loginRequired', data);
+                    }
                 });
             },
             isAuthorized: function (authorizedRoles) {

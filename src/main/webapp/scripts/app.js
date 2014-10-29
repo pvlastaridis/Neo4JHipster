@@ -2,10 +2,10 @@
 
 /* App Module */
 
-var jhipsterApp = angular.module('jhipsterApp', ['http-auth-interceptor', 'tmh.dynamicLocale',
-    'ngResource', 'ngRoute', 'ngCookies', 'jhipsterAppUtils', 'pascalprecht.translate', 'truncate']);
+var mongojhipApp = angular.module('mongojhipApp', ['http-auth-interceptor', 'tmh.dynamicLocale',
+    'ngResource', 'ngRoute', 'ngCookies', 'mongojhipAppUtils', 'pascalprecht.translate', 'truncate']);
 
-jhipsterApp
+mongojhipApp
     .config(function ($routeProvider, $httpProvider, $translateProvider, tmhDynamicLocaleProvider, USER_ROLES) {
             $routeProvider
                 .when('/register', {
@@ -39,14 +39,14 @@ jhipsterApp
                     templateUrl: 'views/settings.html',
                     controller: 'SettingsController',
                     access: {
-                        authorizedRoles: [USER_ROLES.all]
+                        authorizedRoles: [USER_ROLES.user]
                     }
                 })
                 .when('/password', {
                     templateUrl: 'views/password.html',
                     controller: 'PasswordController',
                     access: {
-                        authorizedRoles: [USER_ROLES.all]
+                        authorizedRoles: [USER_ROLES.user]
                     }
                 })
                 .when('/sessions', {
@@ -58,12 +58,19 @@ jhipsterApp
                         }]
                     },
                     access: {
-                        authorizedRoles: [USER_ROLES.all]
+                        authorizedRoles: [USER_ROLES.user]
                     }
                 })
                 .when('/metrics', {
                     templateUrl: 'views/metrics.html',
                     controller: 'MetricsController',
+                    access: {
+                        authorizedRoles: [USER_ROLES.admin]
+                    }
+                })
+                .when('/health', {
+                    templateUrl: 'views/health.html',
+                    controller: 'HealthController',
                     access: {
                         authorizedRoles: [USER_ROLES.admin]
                     }
@@ -133,7 +140,12 @@ jhipsterApp
                 $rootScope.$on('event:auth-loginConfirmed', function(data) {
                     $rootScope.authenticated = true;
                     if ($location.path() === "/login") {
-                        $location.path('/').replace();
+                        var search = $location.search();
+                        if (search.redirect !== undefined) {
+                            $location.path(search.redirect).search('redirect', null).replace();
+                        } else {
+                            $location.path('/').replace();
+                        }
                     }
                 });
 
@@ -142,8 +154,9 @@ jhipsterApp
                     Session.invalidate();
                     $rootScope.authenticated = false;
                     if ($location.path() !== "/" && $location.path() !== "" && $location.path() !== "/register" &&
-                            $location.path() !== "/activate") {
-                        $location.path('/login').replace();
+                            $location.path() !== "/activate" && $location.path() !== "/login") {
+                        var redirect = $location.path();
+                        $location.path('/login').search('redirect', redirect).replace();
                     }
                 });
 
