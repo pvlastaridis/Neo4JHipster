@@ -23,9 +23,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 @RestController
 @RequestMapping("/app")
-public class SecurityController {
+public class UserResource {
 
-    private final Logger log = LoggerFactory.getLogger(SecurityController.class);
+    private final Logger log = LoggerFactory.getLogger(UserResource.class);
 
     @Inject
     Neo4jTemplate neotemp;

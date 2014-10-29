@@ -18,14 +18,14 @@ import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.AuthorityRepository;
 import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
-import com.mycompany.myapp.web.rest.SecurityController;
+import com.mycompany.myapp.web.rest.UserResource;
 
 @Configuration
 @Transactional
 public class Neo4JPopulator {
 
 	private final Logger log = LoggerFactory
-			.getLogger(SecurityController.class);
+			.getLogger(UserResource.class);
 
 	@Inject
 	private UserRepository userRepository;
