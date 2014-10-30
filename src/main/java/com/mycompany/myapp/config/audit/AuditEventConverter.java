@@ -1,14 +1,24 @@
 package com.mycompany.myapp.config.audit;
 
 import com.mycompany.myapp.domain.PersistentAuditEvent;
+import com.mycompany.myapp.domain.PersistentAuditEventData;
+import com.mycompany.myapp.repository.PersistentAuditEventDataRepository;
+
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import javax.inject.Inject;
+
 @Configuration
 public class AuditEventConverter {
+	
+	@Inject
+    private PersistentAuditEventDataRepository persistentAuditEventDataRepository;
+
 
     /**
      * Convert a list of PersistentAuditEvent to a list of AuditEvent
@@ -37,6 +47,7 @@ public class AuditEventConverter {
      * @param data the data to convert
      * @return a map of String, Object
      */
+    @Transactional
     public Map<String, Object> convertDataToObjects(Map<String, String> data) {
         Map<String, Object> results = new HashMap<>();
 
@@ -56,20 +67,31 @@ public class AuditEventConverter {
      * @param data the data to convert
      * @return a map of String, String
      */
-    public Map<String, String> convertDataToStrings(Map<String, Object> data) {
-        Map<String, String> results = new HashMap<>();
-
+    public Set<PersistentAuditEventData> convertDataToStrings(Map<String, Object> data) {
+        
+    	Set<PersistentAuditEventData> results = new HashSet<>();
         if (data != null) {
             for (String key : data.keySet()) {
                 Object object = data.get(key);
-
                 // Extract the data that will be saved.
                 if (object instanceof WebAuthenticationDetails) {
                     WebAuthenticationDetails authenticationDetails = (WebAuthenticationDetails) object;
-                    results.put("remoteAddress", authenticationDetails.getRemoteAddress());
-                    results.put("sessionId", authenticationDetails.getSessionId());
+                    PersistentAuditEventData paevd = new PersistentAuditEventData();
+                    paevd.setName("remoteAddress");
+                    paevd.setValue(authenticationDetails.getRemoteAddress());
+                    PersistentAuditEventData paevd2 = persistentAuditEventDataRepository.save(paevd);
+                    results.add(paevd2);
+                    PersistentAuditEventData paevd3 = new PersistentAuditEventData();
+                    paevd3.setName("sessionId");
+                    paevd3.setValue(authenticationDetails.getSessionId());
+                    PersistentAuditEventData paevd4 = persistentAuditEventDataRepository.save(paevd3);
+                    results.add(paevd4);
                 } else {
-                    results.put(key, object.toString());
+                	PersistentAuditEventData paevd2 = new PersistentAuditEventData();
+                    paevd2.setName(key);
+                    paevd2.setValue(object.toString());
+                    paevd2 = persistentAuditEventDataRepository.save(paevd2);
+                    results.add(paevd2);
                 }
             }
         }

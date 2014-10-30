@@ -3,7 +3,6 @@ package com.mycompany.myapp.service;
 import com.mycompany.myapp.config.audit.AuditEventConverter;
 import com.mycompany.myapp.domain.PersistentAuditEvent;
 import com.mycompany.myapp.repository.PersistentAuditEventRepository;
-import org.joda.time.LocalDateTime;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.stereotype.Service;
 
@@ -20,23 +19,21 @@ import java.util.List;
 @Service
 public class AuditEventService {
 
-    /*@Inject
+    @Inject
     private PersistentAuditEventRepository persistenceAuditEventRepository;
 
     @Inject
-    private AuditEventConverter auditEventConverter;*/
+    private AuditEventConverter auditEventConverter;
 
     public List<AuditEvent> findAll() {
     
-    	// return auditEventConverter.convertToAuditEvent(persistenceAuditEventRepository.findAll());
-        return null;
+    	return auditEventConverter.convertToAuditEvent(persistenceAuditEventRepository.findAll());
     }
 
-    public List<AuditEvent> findByDates(LocalDateTime fromDate, LocalDateTime toDate) {
-      /*  final List<PersistentAuditEvent> persistentAuditEvents =
-                persistenceAuditEventRepository.findByDates(fromDate, toDate);
+    public List<AuditEvent> findByDates(Long fromDate, Long toDate) {
+        final List<PersistentAuditEvent> persistentAuditEvents =
+                persistenceAuditEventRepository.findByAuditEventDateBetween(fromDate, toDate);
 
-        return auditEventConverter.convertToAuditEvent(persistentAuditEvents);*/
-    	return null;
+        return auditEventConverter.convertToAuditEvent(persistentAuditEvents);
     }
 }

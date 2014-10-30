@@ -2,7 +2,6 @@ package com.mycompany.myapp.domain;
 
 //import java.text.SimpleDateFormat;
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -29,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 
 
+@SuppressWarnings("serial")
 @NodeEntity
 public class PersistentToken implements Serializable {
 
