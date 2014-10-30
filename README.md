@@ -1,2 +1,2 @@
-README for mongojhip
+README for neojhipster
 ==========================

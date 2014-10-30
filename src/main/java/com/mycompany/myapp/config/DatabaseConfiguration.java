@@ -21,12 +21,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableNeo4jRepositories(basePackages = "com.mycompany.myapp.repository")
 @EnableTransactionManagement
-public class Neo4JConfig extends Neo4jConfiguration {
+public class DatabaseConfiguration extends Neo4jConfiguration {
 	
 	//private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
-	public Neo4JConfig() {
+	public DatabaseConfiguration() {
 		
 		setBasePackage("com.mycompany.myapp.domain");
 		

@@ -2,7 +2,7 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.config.audit.AuditEventConverter;
 import com.mycompany.myapp.domain.PersistentAuditEvent;
-import com.mycompany.myapp.repository.PersistenceAuditEventRepository;
+import com.mycompany.myapp.repository.PersistentAuditEventRepository;
 import org.joda.time.LocalDateTime;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.List;
 public class AuditEventService {
 
     /*@Inject
-    private PersistenceAuditEventRepository persistenceAuditEventRepository;
+    private PersistentAuditEventRepository persistenceAuditEventRepository;
 
     @Inject
     private AuditEventConverter auditEventConverter;*/

@@ -1,10 +1,13 @@
 package com.mycompany.myapp.domain;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.validator.constraints.Email;
 import org.neo4j.graphdb.Direction;
 import org.springframework.data.neo4j.annotation.Fetch;
 import org.springframework.data.neo4j.annotation.GraphId;
@@ -12,30 +15,54 @@ import org.springframework.data.neo4j.annotation.Indexed;
 import org.springframework.data.neo4j.annotation.NodeEntity;
 import org.springframework.data.neo4j.annotation.RelatedTo;
 
+/**
+ * A user.
+ */
+
+@SuppressWarnings("serial")
 @NodeEntity
-public class User {
+public class User extends AbstractAuditingEntity implements Serializable{
 
 	@GraphId
 	Long id;
 
+	@NotNull
 	@Indexed
 	public String login;
+	
+	@JsonIgnore
+    @Size(min = 0, max = 100)
 	public String password;
+	
+ 	
+ 	@Size(min = 0, max = 50)
 	public String firstName;
+
+
+	@Size(min = 0, max = 50)
 	public String lastName;
+	
+	@Email
+    @Size(min = 0, max = 100)
 	public String email;
+	
 	public boolean activated;
+	
+
+	@Size(min = 2, max = 5)
 	public String langKey;
+	
+	@Size(min = 0, max = 20)
 	public String activationKey;
 
+    @JsonIgnore
 	@RelatedTo(direction = Direction.OUTGOING)
 	@Fetch
 	Set<Authority> authorities = new HashSet<Authority>();
 
-	
-
-	public User() {
-	}
+	@RelatedTo(direction = Direction.INCOMING)
+	@Fetch
+    private Set<PersistentToken> persistentTokens = new HashSet<>();
 
 	public String getLogin() {
 		return login;
@@ -107,30 +134,6 @@ public class User {
 
 	public void setAuthorities(Set<Authority> authorities) {
 		this.authorities = authorities;
-	}
-
-	
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-
-		User user = (User) o;
-
-		if (!login.equals(user.login)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		return login.hashCode();
 	}
 
 	@Override

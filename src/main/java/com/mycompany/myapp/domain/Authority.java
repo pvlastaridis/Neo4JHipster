@@ -23,5 +23,10 @@ public class Authority {
 			this.name = name;
 		}
 		
-		
+	    @Override
+	    public String toString() {
+	        return "Authority{" +
+	                "name='" + name + '\'' +
+	                "}";
+	    }
 }

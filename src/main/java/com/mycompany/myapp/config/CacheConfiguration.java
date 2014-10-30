@@ -16,7 +16,7 @@ import java.util.SortedSet;
 
 @Configuration
 @EnableCaching
-@AutoConfigureAfter(value = {MetricsConfiguration.class, Neo4JConfig.class})
+@AutoConfigureAfter(value = {MetricsConfiguration.class, DatabaseConfiguration.class})
 public class CacheConfiguration {
 
     private final Logger log = LoggerFactory.getLogger(CacheConfiguration.class);

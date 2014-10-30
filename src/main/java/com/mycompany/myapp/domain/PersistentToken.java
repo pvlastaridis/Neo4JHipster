@@ -1,8 +1,15 @@
 package com.mycompany.myapp.domain;
 
 //import java.text.SimpleDateFormat;
+import java.io.Serializable;
 import java.util.Date;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.neo4j.graphdb.Direction;
 import org.springframework.data.neo4j.annotation.Fetch;
 import org.springframework.data.neo4j.annotation.GraphId;
@@ -13,13 +20,22 @@ import org.springframework.data.neo4j.annotation.RelatedTo;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@NodeEntity
-public class PersistentToken {
 
-	
+
+/**
+ * Persistent tokens are used by Spring Security to automatically log in users.
+ *
+ * @see com.mycompany.myapp.security.CustomPersistentRememberMeServices
+ */
+
+
+@NodeEntity
+public class PersistentToken implements Serializable {
+
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("d MMMM yyyy");
+
 	private static final int MAX_USER_AGENT_LEN = 255;
 
-	//SimpleDateFormat sdf = new SimpleDateFormat("d MMMM yyyy");
 	
 	@GraphId
 	Long id;
@@ -27,59 +43,61 @@ public class PersistentToken {
 	@Indexed
 	public String series;
 	
+	@JsonIgnore
+    @NotNull
     private String tokenValue;
+   
     @Indexed
     private Long tokenDate;
-    
+
+    //an IPV6 address max length is 39 characters
+    @Size(min = 0, max = 39)
     private String ipAddress;
+    
+
     private String userAgent;
     
+	@JsonIgnore
     @RelatedTo(type = "PERSISTENT_TOKENS", direction = Direction.OUTGOING)
 	@Fetch
     private User user;
 
-	
-	public PersistentToken(){}
-	
-	
-	 
-	    public String getSeries() {
-	        return series;
-	    }
+    public String getSeries() {
+        return series;
+    }
 
-	    public void setSeries(String series) {
-	        this.series = series;
-	    }
+    public void setSeries(String series) {
+        this.series = series;
+    }
 
-	    public String getTokenValue() {
-	        return tokenValue;
-	    }
+    public String getTokenValue() {
+        return tokenValue;
+    }
 
-	    public void setTokenValue(String tokenValue) {
-	        this.tokenValue = tokenValue;
-	    }
+    public void setTokenValue(String tokenValue) {
+        this.tokenValue = tokenValue;
+    }
 
-	    public Long getTokenDate() {
-	        return tokenDate;
-	    }
+    public LocalDate getTokenDate() {
+        return new LocalDate(tokenDate);
+    }
 
-	    public void setTokenDate(Long tokenDate) {
-	        this.tokenDate = tokenDate;
-	    }
+    public void setTokenDate(LocalDate tokenDate) {
+        this.tokenDate = tokenDate.toDate().getTime();
+    }
 
-	    @JsonGetter
-	    public String getFormattedTokenDate() {
-	        Date tokDate = new Date(this.tokenDate);
-	        return tokDate.toString();
-	    }
+    @JsonGetter
+    public String getFormattedTokenDate() {
+        return DATE_TIME_FORMATTER.print(new LocalDate(this.tokenDate));
+    }
 
-	    public String getIpAddress() {
-	        return ipAddress;
-	    }
+    public String getIpAddress() {
+        return ipAddress;
+    }
 
-	    public void setIpAddress(String ipAddress) {
-	        this.ipAddress = ipAddress;
-	    }
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
 
 	    public String getUserAgent() {
 	        return userAgent;
@@ -135,4 +153,3 @@ public class PersistentToken {
 	                "}";
 	    }
 	}
-

@@ -2,7 +2,6 @@ package com.mycompany.myapp;
 
 import java.io.IOException;
 import java.util.Arrays;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -15,7 +14,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
-
 import com.mycompany.myapp.config.Constants;
 
 @ComponentScan
@@ -42,9 +40,13 @@ public class Application {
         }
     }
 
+    /**
+     * Main method, used to run the application.
+     */
 	public static void main(String[] args) {
         SpringApplication app = new SpringApplication(Application.class);
         app.setShowBanner(false);
+        
         SimpleCommandLinePropertySource source = new SimpleCommandLinePropertySource(args);
 
         // Check if the selected profile has been set as argument.
@@ -53,8 +55,6 @@ public class Application {
         
         app.run(args);
 	}
-	
-	
 	
 	 /**
      * Set a default profile if it has not been set

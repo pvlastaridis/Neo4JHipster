@@ -40,7 +40,7 @@ import java.util.Set;
  * Service class for managing users.
  */
 @Service
-@Transactional
+//@Transactional
 public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
@@ -113,7 +113,7 @@ public class UserService {
         log.debug("Changed password for User: {}", currentUser);
     }
 
-    @Transactional(readOnly = true)
+    //@Transactional(readOnly = true)
     public User getUserWithAuthorities() {
     	String login = SecurityUtils.getCurrentLogin();
         log.info("SecurityUtils.getCurrentLogin() found user with login: " + login);
@@ -123,7 +123,7 @@ public class UserService {
         return currentUser;
     }
     
-    @Transactional(readOnly = true)
+    //@Transactional(readOnly = true)
     public List<PersistentToken> getTokens(String login) {
     	List<PersistentToken> lipt = new ArrayList<PersistentToken>();
     	Iterable<PersistentToken> itpt = persistentTokenRepository.getToken(login);

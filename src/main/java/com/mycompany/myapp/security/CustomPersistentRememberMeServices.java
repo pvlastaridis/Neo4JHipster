@@ -1,5 +1,6 @@
 package com.mycompany.myapp.security;
 
+import org.joda.time.LocalDate;
 import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +108,7 @@ public class CustomPersistentRememberMeServices extends
 		// keeping the *same* series number.
 		log.info("Matched token found for user '{}', series '{}'", login,
 				token.getSeries());
-		token.setTokenDate(System.currentTimeMillis());
+		token.setTokenDate(new LocalDate());
 		token.setTokenValue(generateTokenData());
 		token.setIpAddress(request.getRemoteAddr());
 		token.setUserAgent(request.getHeader("User-Agent"));
@@ -185,7 +186,7 @@ public class CustomPersistentRememberMeServices extends
 			token.setSeries(generateSeriesData());
 			token.setTokenValue(generateTokenData());
 			token.setUser(user);
-			token.setTokenDate(System.currentTimeMillis());
+			token.setTokenDate(new LocalDate());
 			token.setIpAddress(request.getRemoteAddr());
 			token.setUserAgent(request.getHeader("User-Agent"));
 			try {
@@ -279,12 +280,11 @@ public class CustomPersistentRememberMeServices extends
 			// Token doesn't match series value. Delete this session and throw
 			// an exception.
 			persistentTokenRepository.delete(token);
-			throw new CookieTheftException(
-					"Invalid remember-me token (Series/token) mismatch. Implies previous cookie theft attack.");
+			//throw new CookieTheftException(
+			//		"Invalid remember-me token (Series/token) mismatch. Implies previous cookie theft attack.");
 		}
 
-		if (token.getTokenDate() + TOKEN_VALIDITY_SECONDS < System
-				.currentTimeMillis()) {
+        if (token.getTokenDate().plusDays(TOKEN_VALIDITY_DAYS).isBefore(LocalDate.now())) {
 			persistentTokenRepository.delete(token);
 			throw new RememberMeAuthenticationException(
 					"Remember-me login has expired");
