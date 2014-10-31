@@ -19,7 +19,7 @@ spring:
         host: smtp.gmail.com
         port: 587
         user: panosvlastaridis@gmail.com
-        password: ********
+        password: password
         protocol: smtp
         tls: true
         auth: true
