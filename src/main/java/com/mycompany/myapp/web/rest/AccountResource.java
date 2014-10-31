@@ -1,6 +1,7 @@
 package com.mycompany.myapp.web.rest;
 
-/*import com.mycompany.myapp.domain.Authority;
+import com.codahale.metrics.annotation.Timed;
+import com.mycompany.myapp.domain.Authority;
 import com.mycompany.myapp.domain.PersistentToken;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.PersistentTokenRepository;
@@ -8,30 +9,23 @@ import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.SecurityUtils;
 import com.mycompany.myapp.service.MailService;
 import com.mycompany.myapp.service.UserService;
-import com.mycompany.myapp.web.rest.rest.dto.UserDTO;
-import org.apache.commons.lang.StringUtils;*/
+import com.mycompany.myapp.web.rest.dto.UserDTO;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import com.mycompany.myapp.domain.Authority;
-import com.mycompany.myapp.domain.PersistentToken;
-import com.mycompany.myapp.domain.User;
-import com.mycompany.myapp.repository.PersistentTokenRepository;
-import com.mycompany.myapp.repository.UserRepository;
-import com.mycompany.myapp.security.SecurityUtils;
-import com.mycompany.myapp.service.UserService;
+import org.thymeleaf.context.IWebContext;
+import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.spring4.context.SpringWebContext;
 
 import javax.inject.Inject;
-//import javax.servlet.ServletContext;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
@@ -45,14 +39,14 @@ public class AccountResource {
 
     private final Logger log = LoggerFactory.getLogger(AccountResource.class);
 
-    //@Inject
-    //private ServletContext servletContext;
+    @Inject
+    private ServletContext servletContext;
 
-    //@Inject
-    //private ApplicationContext applicationContext;
+    @Inject
+    private ApplicationContext applicationContext;
 
-    /*@Inject
-    private SpringTemplateEngine templateEngine;*/
+    @Inject
+    private SpringTemplateEngine templateEngine;
 
     @Inject
     private UserRepository userRepository;
@@ -63,8 +57,8 @@ public class AccountResource {
     @Inject
     private PersistentTokenRepository persistentTokenRepository;
 
-    /*@Inject
-    private MailService mailService;*/
+    @Inject
+    private MailService mailService;
 
     /**
      * POST  /rest/register -> register the user.
@@ -72,7 +66,7 @@ public class AccountResource {
     @RequestMapping(value = "/rest/register",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    //@Timed
+    @Timed
     public ResponseEntity<?> registerAccount(@RequestBody UserDTO userDTO, HttpServletRequest request,
                                              HttpServletResponse response) {
         User user = userRepository.findByLogin(userDTO.getLogin());
@@ -81,9 +75,9 @@ public class AccountResource {
         } else {
             user = userService.createUserInformation(userDTO.getLogin(), userDTO.getPassword(), userDTO.getFirstName(),
                     userDTO.getLastName(), userDTO.getEmail().toLowerCase(), userDTO.getLangKey());
-            //final Locale locale = Locale.forLanguageTag(user.getLangKey());
-            //String content = createHtmlContentFromTemplate(user, locale, request, response);
-            //mailService.sendActivationEmail(user.getEmail(), content, locale);
+            final Locale locale = Locale.forLanguageTag(user.getLangKey());
+            String content = createHtmlContentFromTemplate(user, locale, request, response);
+            mailService.sendActivationEmail(user.getEmail(), content, locale);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
     }
@@ -93,7 +87,7 @@ public class AccountResource {
     @RequestMapping(value = "/rest/activate",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    //@Timed
+    @Timed
     public ResponseEntity<String> activateAccount(@RequestParam(value = "key") String key) {
         User user = userService.activateRegistration(key);
         if (user == null) {
@@ -108,7 +102,7 @@ public class AccountResource {
     @RequestMapping(value = "/rest/authenticate",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    //@Timed
+    @Timed
     public String isAuthenticated(HttpServletRequest request) {
         log.debug("REST request to check if the current user is authenticated");
         return request.getRemoteUser();
@@ -120,18 +114,14 @@ public class AccountResource {
     @RequestMapping(value = "/rest/account",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    //@Timed
+    @Timed
     public ResponseEntity<UserDTO> getAccount() {
         User user = userService.getUserWithAuthorities();
         if (user == null) {
-            log.info("/rest/account/ has not found user");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        log.info("/rest/account/ found user: " + user.getLastName());
-
         List<String> roles = new ArrayList<>();
         for (Authority authority : user.getAuthorities()) {
-            log.info("/rest/account/ roles of user: " + authority.getName());
             roles.add(authority.getName());
         }
         return new ResponseEntity<>(
@@ -152,7 +142,7 @@ public class AccountResource {
     @RequestMapping(value = "/rest/account",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    //@Timed
+    @Timed
     public void saveAccount(@RequestBody UserDTO userDTO) {
         userService.updateUserInformation(userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail());
     }
@@ -163,7 +153,7 @@ public class AccountResource {
     @RequestMapping(value = "/rest/account/change_password",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    //@Timed
+    @Timed
     public ResponseEntity<?> changePassword(@RequestBody String password) {
         if (StringUtils.isEmpty(password)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -178,13 +168,15 @@ public class AccountResource {
     @RequestMapping(value = "/rest/account/sessions",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    //@Timed
-    public  List<PersistentToken>  getCurrentSessions() {
-        
-        return userService.getTokens(SecurityUtils.getCurrentLogin());//new ResponseEntity<>(
-            //persistentTokenRepository.findByUser(user)
-        	//iterble;//,
-            //HttpStatus.OK);
+    @Timed
+    public ResponseEntity<List<PersistentToken>> getCurrentSessions() {
+        User user = userRepository.findByLogin(SecurityUtils.getCurrentLogin());
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(
+            persistentTokenRepository.findByUser(user),
+            HttpStatus.OK);
     }
 
     /**
@@ -202,20 +194,20 @@ public class AccountResource {
      */
     @RequestMapping(value = "/rest/account/sessions/{series}",
             method = RequestMethod.DELETE)
-    //@Timed
+    @Timed
     public void invalidateSession(@PathVariable String series) throws UnsupportedEncodingException {
         String decodedSeries = URLDecoder.decode(series, "UTF-8");
-        String login = SecurityUtils.getCurrentLogin();
-        //User user = userRepository.findByLogin(login);
-        List<PersistentToken> persistentTokens = userService.getTokens(login);
+        User user = userRepository.findByLogin(SecurityUtils.getCurrentLogin());
+        List<PersistentToken> persistentTokens = persistentTokenRepository.findByUser(user);
         for (PersistentToken persistentToken : persistentTokens) {
-            if (persistentToken.getSeries().equalsIgnoreCase(decodedSeries)) {
-                persistentTokenRepository.delete(persistentToken);
+            if (StringUtils.equals(persistentToken.getSeries(), decodedSeries)) {
+            	PersistentToken pt = persistentTokenRepository.findBySeries(decodedSeries);
+            	persistentTokenRepository.delete(pt);
             }
         }
     }
 
-   /* private String createHtmlContentFromTemplate(final User user, final Locale locale, final HttpServletRequest request,
+    private String createHtmlContentFromTemplate(final User user, final Locale locale, final HttpServletRequest request,
                                                  final HttpServletResponse response) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("user", user);
@@ -225,81 +217,5 @@ public class AccountResource {
         IWebContext context = new SpringWebContext(request, response, servletContext,
                 locale, variables, applicationContext);
         return templateEngine.process("activationEmail", context);
-    }*/
-}
-
-
-class UserDTO {
-
-    private String login;
-
-    private String password;
-
-    private String firstName;
-
-    private String lastName;
-
-    private String email;
-
-    private String langKey;
-
-    private List<String> roles;
-
-    public UserDTO() {
-    }
-
-    public UserDTO(String login, String password, String firstName, String lastName, String email, String langKey,
-                   List<String> roles) {
-        this.login = login;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.langKey = langKey;
-        this.roles = roles;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getLangKey() {
-        return langKey;
-    }
-
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("UserDTO{");
-        sb.append("login='").append(login).append('\'');
-        if(password != null) {
-            sb.append(", password='").append(password.length()).append('\'');
-        }
-        sb.append(", firstName='").append(firstName).append('\'');
-        sb.append(", lastName='").append(lastName).append('\'');
-        sb.append(", email='").append(email).append('\'');
-        sb.append(", langKey='").append(langKey).append('\'');
-        sb.append(", roles=").append(roles);
-        sb.append('}');
-        return sb.toString();
     }
 }

@@ -3,13 +3,7 @@ server:
 
 spring:
     profiles: prod
-    data:
-        mongodb:
-            host: localhost
-            port: 27017
-            databaseName: mongojhip
     
-
     mail:
         baseUrl: http://localhost:8080
 

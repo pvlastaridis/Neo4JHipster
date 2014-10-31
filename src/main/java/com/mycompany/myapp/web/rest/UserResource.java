@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.AuthorityRepository;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * REST controller for managing users.
  */
+@SessionAttributes
 @RestController
 @RequestMapping("/app")
 public class UserResource {

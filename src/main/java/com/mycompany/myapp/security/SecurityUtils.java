@@ -6,16 +6,13 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-
 import java.util.Collection;
 
 /**
  * Utility class for Spring Security.
  */
 public final class SecurityUtils {
-	
 
-	
     private SecurityUtils() {
     }
 
@@ -34,7 +31,6 @@ public final class SecurityUtils {
                 userName = springSecurityUser.getUsername();
             } else if (authentication.getPrincipal() instanceof String) {
                 userName = (String) authentication.getPrincipal();
-
             }
         }
 

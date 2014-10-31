@@ -1,6 +1,6 @@
 package com.mycompany.myapp.service;
 
-/*import com.mycompany.myapp.domain.Authority;
+import com.mycompany.myapp.domain.Authority;
 import com.mycompany.myapp.domain.PersistentToken;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.AuthorityRepository;
@@ -9,38 +9,22 @@ import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.SecurityUtils;
 import com.mycompany.myapp.service.util.RandomUtil;
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;*/
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.mycompany.myapp.domain.Authority;
-import com.mycompany.myapp.domain.PersistentToken;
-import com.mycompany.myapp.domain.User;
-import com.mycompany.myapp.repository.AuthorityRepository;
-import com.mycompany.myapp.repository.PersistentTokenRepository;
-import com.mycompany.myapp.repository.UserRepository;
-import com.mycompany.myapp.security.SecurityUtils;
-
-//import com.mycompany.myapp.repository.PersistentTokenRepository;
-
 
 import javax.inject.Inject;
-
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-//import java.util.List;
 import java.util.Set;
 
 /**
  * Service class for managing users.
  */
 @Service
-//@Transactional
 public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
@@ -87,8 +71,7 @@ public class UserService {
         // new user is not active
         newUser.setActivated(false);
         // new user gets registration key
-        //newUser.setActivationKey(RandomUtil.generateActivationKey());
-        newUser.setActivationKey("Malakas");
+        newUser.setActivationKey(RandomUtil.generateActivationKey());
         authorities.add(authority);
         newUser.setAuthorities(authorities);
         userRepository.save(newUser);
@@ -113,24 +96,10 @@ public class UserService {
         log.debug("Changed password for User: {}", currentUser);
     }
 
-    //@Transactional(readOnly = true)
     public User getUserWithAuthorities() {
-    	String login = SecurityUtils.getCurrentLogin();
-        log.info("SecurityUtils.getCurrentLogin() found user with login: " + login);
-        User currentUser = userRepository.findByLogin(login);
-        // currentUser.getAuthorities().size(); // eagerly load the association
-        //log.info("getUserWithAuthorities found user with login: " + currentUser.getLogin());
+        User currentUser = userRepository.findByLogin(SecurityUtils.getCurrentLogin());
+        currentUser.getAuthorities().size(); // eagerly load the association
         return currentUser;
-    }
-    
-    //@Transactional(readOnly = true)
-    public List<PersistentToken> getTokens(String login) {
-    	List<PersistentToken> lipt = new ArrayList<PersistentToken>();
-    	Iterable<PersistentToken> itpt = persistentTokenRepository.getToken(login);
-    	for (PersistentToken pt: itpt) {
-    		lipt.add(pt);
-    	}
-    	return lipt;
     }
 
     /**
@@ -140,15 +109,13 @@ public class UserService {
      * <p>
      * This is scheduled to get fired everyday, at midnight.
      * </p>
-     *
+     */
     @Scheduled(cron = "0 0 0 * * ?")
     public void removeOldPersistentTokens() {
         LocalDate now = new LocalDate();
-        List<PersistentToken> tokens = persistentTokenRepository.findByTokenDateBefore(now.minusMonths(1));
+        List<PersistentToken> tokens = persistentTokenRepository.findByTokenDateGreaterThan(now.minusMonths(1).toDate().getTime());
         for (PersistentToken token : tokens) {
             log.debug("Deleting token {}", token.getSeries());
-            User user = token.getUser();
-            user.getPersistentTokens().remove(token);
             persistentTokenRepository.delete(token);
         }
     }
@@ -159,14 +126,14 @@ public class UserService {
      * <p>
      * This is scheduled to get fired everyday, at 01:00 (am).
      * </p>
-     *
+     */
     @Scheduled(cron = "0 0 1 * * ?")
     public void removeNotActivatedUsers() {
         DateTime now = new DateTime();
-        List<User> users = userRepository.findNotActivatedUsersByCreationDateBefore(now.minusDays(3));
+        List<User> users = userRepository.findNotActivatedUsersByCreationDateBefore(now.minusDays(3).toDate().getTime());
         for (User user : users) {
             log.debug("Deleting not activated user {}", user.getLogin());
             userRepository.delete(user);
         }
-    }*/
+    }
 }

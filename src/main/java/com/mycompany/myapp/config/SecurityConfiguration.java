@@ -1,7 +1,10 @@
 package com.mycompany.myapp.config;
 
+import com.mycompany.myapp.security.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
@@ -14,14 +17,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.security.web.authentication.RememberMeServices;
 
-import com.mycompany.myapp.security.*;
-
 import javax.inject.Inject;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-   
+    
+    @Inject
+    private Environment env;
+
     @Inject
     private AjaxAuthenticationSuccessHandler ajaxAuthenticationSuccessHandler;
 
@@ -62,8 +66,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/styles/**")
             .antMatchers("/views/**")
             .antMatchers("/i18n/**")
-            .antMatchers("/swagger-ui/**")
-            .antMatchers("/console/**");
+            .antMatchers("/swagger-ui/**");
     }
     
     @Override
@@ -74,8 +77,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
             .rememberMe()
                 .rememberMeServices(rememberMeServices)
-                .key("hello")
-                .and()           
+                .key(env.getProperty("jhipster.security.rememberme.key"))
+                .and()
             .formLogin()
                 .loginProcessingUrl("/app/authentication")
                 .successHandler(ajaxAuthenticationSuccessHandler)
@@ -99,9 +102,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/app/rest/activate").permitAll()
                 .antMatchers("/app/rest/authenticate").permitAll()
                 .antMatchers("/app/rest/logs/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/app/**").permitAll()
-                .antMatchers("/websocket/tracker").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/websocket/**").permitAll()
+                .antMatchers("/app/**").authenticated()
                 .antMatchers("/metrics/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/health/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/trace/**").hasAuthority(AuthoritiesConstants.ADMIN)
@@ -123,3 +124,139 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private static class GlobalSecurityConfiguration extends GlobalMethodSecurityConfiguration {
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -15,14 +15,14 @@ async:
 
 spring:
     mail:
-        host: localhost
-        port: 25
-        user:
-        password:
+        from: panosvlastaridis@gmail.com
+        host: smtp.gmail.com
+        port: 587
+        user: panosvlastaridis@gmail.com
+        password: ********
         protocol: smtp
-        tls: false
-        auth: false
-        from: mongojhip@localhost
+        tls: true
+        auth: true
 
     messageSource:
         cacheSeconds: 1

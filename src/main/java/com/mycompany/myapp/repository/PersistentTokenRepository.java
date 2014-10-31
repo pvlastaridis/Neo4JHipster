@@ -6,6 +6,7 @@ import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.GraphRepository;
 
 import com.mycompany.myapp.domain.PersistentToken;
+import com.mycompany.myapp.domain.User;
 
 public interface PersistentTokenRepository extends GraphRepository<PersistentToken> {
 
@@ -16,5 +17,7 @@ public interface PersistentTokenRepository extends GraphRepository<PersistentTok
 	Iterable<PersistentToken> getToken(String login);
 	
     List<PersistentToken> findByTokenDateGreaterThan(Long date);
+    
+    List<PersistentToken> findByUser(User user);
 	
 }
