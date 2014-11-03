@@ -2,13 +2,13 @@
 
 /* Controllers */
 
-mongojhipApp.controller('MainController', function ($scope) {
+neo4jhipsterApp.controller('MainController', function ($scope) {
     });
 
-mongojhipApp.controller('AdminController', function ($scope) {
+neo4jhipsterApp.controller('AdminController', function ($scope) {
     });
 
-mongojhipApp.controller('LanguageController', function ($scope, $translate, LanguageService) {
+neo4jhipsterApp.controller('LanguageController', function ($scope, $translate, LanguageService) {
         $scope.changeLanguage = function (languageKey) {
             $translate.use(languageKey);
 
@@ -22,10 +22,10 @@ mongojhipApp.controller('LanguageController', function ($scope, $translate, Lang
         });
     });
 
-mongojhipApp.controller('MenuController', function ($scope) {
+neo4jhipsterApp.controller('MenuController', function ($scope) {
     });
 
-mongojhipApp.controller('LoginController', function ($scope, $location, AuthenticationSharedService) {
+neo4jhipsterApp.controller('LoginController', function ($scope, $location, AuthenticationSharedService) {
         $scope.rememberMe = true;
         $scope.login = function () {
             AuthenticationSharedService.login({
@@ -36,11 +36,11 @@ mongojhipApp.controller('LoginController', function ($scope, $location, Authenti
         }
     });
 
-mongojhipApp.controller('LogoutController', function ($location, AuthenticationSharedService) {
+neo4jhipsterApp.controller('LogoutController', function ($location, AuthenticationSharedService) {
         AuthenticationSharedService.logout();
     });
 
-mongojhipApp.controller('SettingsController', function ($scope, Account) {
+neo4jhipsterApp.controller('SettingsController', function ($scope, Account) {
         $scope.success = null;
         $scope.error = null;
         $scope.settingsAccount = Account.get();
@@ -59,7 +59,7 @@ mongojhipApp.controller('SettingsController', function ($scope, Account) {
         };
     });
 
-mongojhipApp.controller('RegisterController', function ($scope, $translate, Register) {
+neo4jhipsterApp.controller('RegisterController', function ($scope, $translate, Register) {
         $scope.success = null;
         $scope.error = null;
         $scope.doNotMatch = null;
@@ -91,7 +91,7 @@ mongojhipApp.controller('RegisterController', function ($scope, $translate, Regi
         }
     });
 
-mongojhipApp.controller('ActivationController', function ($scope, $routeParams, Activate) {
+neo4jhipsterApp.controller('ActivationController', function ($scope, $routeParams, Activate) {
         Activate.get({key: $routeParams.key},
             function (value, responseHeaders) {
                 $scope.error = null;
@@ -103,7 +103,7 @@ mongojhipApp.controller('ActivationController', function ($scope, $routeParams, 
             });
     });
 
-mongojhipApp.controller('PasswordController', function ($scope, Password) {
+neo4jhipsterApp.controller('PasswordController', function ($scope, Password) {
         $scope.success = null;
         $scope.error = null;
         $scope.doNotMatch = null;
@@ -125,7 +125,7 @@ mongojhipApp.controller('PasswordController', function ($scope, Password) {
         };
     });
 
-mongojhipApp.controller('SessionsController', function ($scope, resolvedSessions, Sessions) {
+neo4jhipsterApp.controller('SessionsController', function ($scope, resolvedSessions, Sessions) {
         $scope.success = null;
         $scope.error = null;
         $scope.sessions = resolvedSessions;
@@ -143,7 +143,7 @@ mongojhipApp.controller('SessionsController', function ($scope, resolvedSessions
         };
     });
 
- mongojhipApp.controller('HealthController', function ($scope, HealthCheckService) {
+ neo4jhipsterApp.controller('HealthController', function ($scope, HealthCheckService) {
      $scope.updatingHealth = true;
 
      $scope.refresh = function() {
@@ -168,7 +168,7 @@ mongojhipApp.controller('SessionsController', function ($scope, resolvedSessions
      }
  });
 
-mongojhipApp.controller('MetricsController', function ($scope, MetricsService, HealthCheckService, ThreadDumpService) {
+neo4jhipsterApp.controller('MetricsController', function ($scope, MetricsService, HealthCheckService, ThreadDumpService) {
         $scope.metrics = {};
 		$scope.updatingMetrics = true;
 
@@ -248,7 +248,7 @@ mongojhipApp.controller('MetricsController', function ($scope, MetricsService, H
         };
     });
 
-mongojhipApp.controller('LogsController', function ($scope, resolvedLogs, LogsService) {
+neo4jhipsterApp.controller('LogsController', function ($scope, resolvedLogs, LogsService) {
         $scope.loggers = resolvedLogs;
 
         $scope.changeLevel = function (name, level) {
@@ -258,7 +258,7 @@ mongojhipApp.controller('LogsController', function ($scope, resolvedLogs, LogsSe
         }
     });
 
-mongojhipApp.controller('AuditsController', function ($scope, $translate, $filter, AuditsService) {
+neo4jhipsterApp.controller('AuditsController', function ($scope, $translate, $filter, AuditsService) {
         $scope.onChangeDate = function() {
             AuditsService.findByDates($scope.fromDate, $scope.toDate).then(function(data){
                 $scope.audits = data;

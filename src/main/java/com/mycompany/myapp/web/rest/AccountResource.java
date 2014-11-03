@@ -201,8 +201,7 @@ public class AccountResource {
         List<PersistentToken> persistentTokens = persistentTokenRepository.findByUser(user);
         for (PersistentToken persistentToken : persistentTokens) {
             if (StringUtils.equals(persistentToken.getSeries(), decodedSeries)) {
-            	PersistentToken pt = persistentTokenRepository.findBySeries(decodedSeries);
-            	persistentTokenRepository.delete(pt);
+                persistentTokenRepository.delete(persistentTokenRepository.findBySeries(decodedSeries));
             }
         }
     }

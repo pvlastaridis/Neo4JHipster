@@ -38,7 +38,7 @@ public class AsyncConfiguration implements AsyncConfigurer, EnvironmentAware {
         executor.setCorePoolSize(propertyResolver.getProperty("corePoolSize", Integer.class, 2));
         executor.setMaxPoolSize(propertyResolver.getProperty("maxPoolSize", Integer.class, 50));
         executor.setQueueCapacity(propertyResolver.getProperty("queueCapacity", Integer.class, 10000));
-        executor.setThreadNamePrefix("mongojhip-Executor-");
+        executor.setThreadNamePrefix("neo4jhipster-Executor-");
         return new ExceptionHandlingAsyncTaskExecutor(executor);
     }
 }

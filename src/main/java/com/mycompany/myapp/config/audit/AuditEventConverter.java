@@ -2,12 +2,11 @@ package com.mycompany.myapp.config.audit;
 
 import com.mycompany.myapp.domain.PersistentAuditEvent;
 import com.mycompany.myapp.domain.PersistentAuditEventData;
-import com.mycompany.myapp.repository.PersistentAuditEventDataRepository;
+import com.mycompany.myapp.repository.PersistenceAuditEventDataRepository;
 
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -17,8 +16,7 @@ import javax.inject.Inject;
 public class AuditEventConverter {
 	
 	@Inject
-    private PersistentAuditEventDataRepository persistentAuditEventDataRepository;
-
+    private PersistenceAuditEventDataRepository persistentAuditEventDataRepository;
 
     /**
      * Convert a list of PersistentAuditEvent to a list of AuditEvent
@@ -47,7 +45,6 @@ public class AuditEventConverter {
      * @param data the data to convert
      * @return a map of String, Object
      */
-    @Transactional
     public Map<String, Object> convertDataToObjects(Map<String, String> data) {
         Map<String, Object> results = new HashMap<>();
 
@@ -61,7 +58,7 @@ public class AuditEventConverter {
     }
 
     /**
-     * Internal conversion. This method will allow to save additionnals data.
+     * Internal conversion. This method will allow to save additional data.
      * By default, it will save the object as string
      *
      * @param data the data to convert
@@ -79,19 +76,19 @@ public class AuditEventConverter {
                     PersistentAuditEventData paevd = new PersistentAuditEventData();
                     paevd.setName("remoteAddress");
                     paevd.setValue(authenticationDetails.getRemoteAddress());
-                    PersistentAuditEventData paevd2 = persistentAuditEventDataRepository.save(paevd);
-                    results.add(paevd2);
-                    PersistentAuditEventData paevd3 = new PersistentAuditEventData();
-                    paevd3.setName("sessionId");
-                    paevd3.setValue(authenticationDetails.getSessionId());
-                    PersistentAuditEventData paevd4 = persistentAuditEventDataRepository.save(paevd3);
-                    results.add(paevd4);
+                    paevd = persistentAuditEventDataRepository.save(paevd);
+                    results.add(paevd);
+                    paevd = new PersistentAuditEventData();
+                    paevd.setName("sessionId");
+                    paevd.setValue(authenticationDetails.getSessionId());
+                    paevd = persistentAuditEventDataRepository.save(paevd);
+                    results.add(paevd);
                 } else {
-                	PersistentAuditEventData paevd2 = new PersistentAuditEventData();
-                    paevd2.setName(key);
-                    paevd2.setValue(object.toString());
-                    paevd2 = persistentAuditEventDataRepository.save(paevd2);
-                    results.add(paevd2);
+                	PersistentAuditEventData paevd = new PersistentAuditEventData();
+                    paevd.setName(key);
+                    paevd.setValue(object.toString());
+                    paevd = persistentAuditEventDataRepository.save(paevd);
+                    results.add(paevd);
                 }
             }
         }

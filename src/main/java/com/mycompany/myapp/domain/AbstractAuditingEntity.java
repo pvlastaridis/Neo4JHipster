@@ -8,8 +8,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 
-
-
 /**
  * Base abstract class for entities which will hold definitions for created, last modified by and created,
  * last modified by date.
@@ -17,19 +15,15 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 public abstract class AbstractAuditingEntity {
 
-    
     @CreatedBy
     private String createdBy;
 
-    
     @CreatedDate
     private Long createdDate = DateTime.now().getMillis();
 
-    
     @LastModifiedBy
     private String lastModifiedBy;
 
-    
     @LastModifiedDate
     private Long lastModifiedDate = DateTime.now().getMillis();
 

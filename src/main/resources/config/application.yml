@@ -6,7 +6,7 @@ security.basic.enabled: false
 endpoints.jolokia.enabled: false
 
 # security configuration (this key should be unique for your application, and kept secret)
-jhipster.security.rememberme.key: mongojhip
+jhipster.security.rememberme.key: Neo4JHipster
 
 async:
     corePoolSize: 2
@@ -15,21 +15,21 @@ async:
 
 spring:
     mail:
-        from: panosvlastaridis@gmail.com
-        host: smtp.gmail.com
-        port: 587
-        user: panosvlastaridis@gmail.com
-        password: password
+        host: localhost
+        port: 25
+        user:
+        password:
         protocol: smtp
-        tls: true
-        auth: true
+        tls: false
+        auth: false
+        from: Neo4JHipster@localhost
 
     messageSource:
         cacheSeconds: 1
 
 swagger:
-    title: mongojhip API
-    description: mongojhip applications and beyond!
+    title: Neo4JHipster API
+    description: Neo4JHipster applications and beyond!
     termsOfServiceUrl: http://jhipster.github.io/
     contact:
     license: Apache 2.0

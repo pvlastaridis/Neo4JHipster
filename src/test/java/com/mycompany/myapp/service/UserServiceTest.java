@@ -10,7 +10,6 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-//import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -58,14 +57,13 @@ public class UserServiceTest {
     public void testFindNotActivatedUsersByCreationDateBefore() {
         userService.removeNotActivatedUsers();
         DateTime now = new DateTime();
-        List<User> users = userRepository.findNotActivatedUsersByCreationDateBefore(now.minusDays(3).toDateTime().getMillis());
+        List<User> users = userRepository.findNotActivatedUsersByCreationDateBefore(now.minusDays(3).getMillis());
         assertThat(users).isEmpty();
     }
 
     private void generateUserToken(User user, String tokenSeries, LocalDate localDate) {
         PersistentToken token = new PersistentToken();
         token.setSeries(tokenSeries);
-        
         token.setUser(user);
         token.setTokenValue(tokenSeries + "-data");
         token.setTokenDate(localDate);

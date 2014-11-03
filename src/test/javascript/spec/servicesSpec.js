@@ -2,7 +2,7 @@
 
 describe('Services Tests ', function () {
 
-    beforeEach(module('mongojhipApp'));
+    beforeEach(module('neo4jhipsterApp'));
 
     describe('AuthenticationSharedService', function () {
         var serviceTested,

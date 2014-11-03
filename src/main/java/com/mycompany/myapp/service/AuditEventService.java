@@ -2,7 +2,7 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.config.audit.AuditEventConverter;
 import com.mycompany.myapp.domain.PersistentAuditEvent;
-import com.mycompany.myapp.repository.PersistentAuditEventRepository;
+import com.mycompany.myapp.repository.PersistenceAuditEventRepository;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +20,13 @@ import java.util.List;
 public class AuditEventService {
 
     @Inject
-    private PersistentAuditEventRepository persistenceAuditEventRepository;
+    private PersistenceAuditEventRepository persistenceAuditEventRepository;
 
     @Inject
     private AuditEventConverter auditEventConverter;
 
     public List<AuditEvent> findAll() {
-    
-    	return auditEventConverter.convertToAuditEvent(persistenceAuditEventRepository.findAll());
+        return auditEventConverter.convertToAuditEvent(persistenceAuditEventRepository.findAll());
     }
 
     public List<AuditEvent> findByDates(Long fromDate, Long toDate) {

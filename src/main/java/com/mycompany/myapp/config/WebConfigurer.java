@@ -6,7 +6,6 @@ import com.codahale.metrics.servlets.MetricsServlet;
 import com.mycompany.myapp.web.filter.CachingHttpHeadersFilter;
 import com.mycompany.myapp.web.filter.StaticResourcesProductionFilter;
 import com.mycompany.myapp.web.filter.gzip.GZipServletFilter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -16,7 +15,6 @@ import org.springframework.core.env.Environment;
 
 import javax.inject.Inject;
 import javax.servlet.*;
-
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;

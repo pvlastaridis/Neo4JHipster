@@ -1,4 +1,4 @@
-angular.module('mongojhipAppUtils', [])
+angular.module('neo4jhipsterAppUtils', [])
     .service('Base64Service', function () {
         var keyStr = "ABCDEFGHIJKLMNOP" +
             "QRSTUVWXYZabcdef" +

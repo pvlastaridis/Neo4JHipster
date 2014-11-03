@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
-//import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mycompany.myapp.domain.Authority;
@@ -55,7 +54,7 @@ public class Neo4JPopulator {
 			authorities.add(authAdmin);			
 			User user = new User();
 			user.setLogin("admin");
-			user.setPassword("b8f57d6d6ec0a60dfe2e20182d4615b12e321cad9e2979e0b9f81e0d6eda78ad9b6dcfe53e4e22d1");
+			user.setPassword("$2a$10$gSAhZrxMllrbgj/kkK9UceBPpChGWJA7SYIb1Mqo.n5aNLq1/oRrC");
 			user.setFirstName("");
 			user.setLastName("Administrator");
 			user.setEmail("");
@@ -68,7 +67,7 @@ public class Neo4JPopulator {
 			
 			user = new User();
 			user.setLogin("system");
-			user.setPassword("b8f57d6d6ec0a60dfe2e20182d4615b12e321cad9e2979e0b9f81e0d6eda78ad9b6dcfe53e4e22d1");
+			user.setPassword("$2a$10$mE.qmcV0mFU5NcKh73TZx.z4ueI/.bDWbj0T1BYyqP481kGGarKLG");
 			user.setFirstName("");
 			user.setLastName("System");
 			user.setEmail("");
@@ -82,7 +81,7 @@ public class Neo4JPopulator {
 			authorities = new HashSet<Authority>();
 			user = new User();
 			user.setLogin("anonymousUser");
-			user.setPassword("4f54479f8290dfd503b72a654faf5d70593eab443993d87a79e14e5f7cda3eb7988423aa99090c9b");
+			user.setPassword("$2a$10$j8S5d7Sr7.8VTOYNviDPOeWX8KcYILUVJBsYV83Y5NtECayypx9lO");
 			user.setFirstName("Anonymous");
 			user.setLastName("User");
 			user.setEmail("");
@@ -96,7 +95,7 @@ public class Neo4JPopulator {
 			authorities.add(authUser);
 			user = new User();
 			user.setLogin("user");
-			user.setPassword("4f54479f8290dfd503b72a654faf5d70593eab443993d87a79e14e5f7cda3eb7988423aa99090c9b");
+			user.setPassword("$2a$10$VEjxo0jq2YG9Rbk2HmX9S.k1uZBGYUHdUcid3g/vfiEl7lwWgOH/K");
 			user.setFirstName("");
 			user.setLastName("User");
 			user.setEmail("");

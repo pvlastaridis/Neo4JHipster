@@ -4,7 +4,7 @@ server:
 
 
 # security configuration (this key should be unique for your application, and kept secret)
-jhipster.security.rememberme.key: mongojhip
+jhipster.security.rememberme.key: Neo4JHipster
 
 async:
     corePoolSize: 2

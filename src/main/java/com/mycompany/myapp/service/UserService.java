@@ -81,6 +81,7 @@ public class UserService {
 
     public void updateUserInformation(String firstName, String lastName, String email) {
         User currentUser = userRepository.findByLogin(SecurityUtils.getCurrentLogin());
+        if (currentUser==null) return;
         currentUser.setFirstName(firstName);
         currentUser.setLastName(lastName);
         currentUser.setEmail(email);
@@ -89,7 +90,8 @@ public class UserService {
     }
 
     public void changePassword(String password) {
-        User currentUser = userRepository.findByLogin(SecurityUtils.getCurrentLogin());
+    	User currentUser = userRepository.findByLogin(SecurityUtils.getCurrentLogin());
+        if (currentUser==null) return;
         String encryptedPassword = passwordEncoder.encode(password);
         currentUser.setPassword(encryptedPassword);
         userRepository.save(currentUser);
@@ -97,7 +99,8 @@ public class UserService {
     }
 
     public User getUserWithAuthorities() {
-        User currentUser = userRepository.findByLogin(SecurityUtils.getCurrentLogin());
+    	User currentUser = userRepository.findByLogin(SecurityUtils.getCurrentLogin());
+        if (currentUser==null) return null;
         currentUser.getAuthorities().size(); // eagerly load the association
         return currentUser;
     }
@@ -130,7 +133,7 @@ public class UserService {
     @Scheduled(cron = "0 0 1 * * ?")
     public void removeNotActivatedUsers() {
         DateTime now = new DateTime();
-        List<User> users = userRepository.findNotActivatedUsersByCreationDateBefore(now.minusDays(3).toDate().getTime());
+        List<User> users = userRepository.findNotActivatedUsersByCreationDateBefore(now.minusDays(3).toDateTime().getMillis());
         for (User user : users) {
             log.debug("Deleting not activated user {}", user.getLogin());
             userRepository.delete(user);

@@ -1,15 +1,18 @@
 package com.mycompany.myapp.repository;
 
-import java.util.List;
+import com.mycompany.myapp.domain.User;
 
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.GraphRepository;
 
-import com.mycompany.myapp.domain.User;
+import java.util.List;
 
+/**
+ * Spring Data Neo4JDB repository for the User entity.
+ */
 public interface UserRepository extends GraphRepository<User> {
-	
-	User findByLogin(String login);
+    
+User findByLogin(String login);
 	
 	User findByActivationKey(String activationKey);
 	
@@ -18,4 +21,3 @@ public interface UserRepository extends GraphRepository<User> {
     List<User> findNotActivatedUsersByCreationDateBefore(Long dateTime);
 
 }
-

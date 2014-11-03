@@ -2,7 +2,7 @@
 
 /* Services */
 
-mongojhipApp.factory('LanguageService', function ($http, $translate, LANGUAGES) {
+neo4jhipsterApp.factory('LanguageService', function ($http, $translate, LANGUAGES) {
         return {
             getBy: function(language) {
                 if (language == undefined) {
@@ -12,7 +12,7 @@ mongojhipApp.factory('LanguageService', function ($http, $translate, LANGUAGES) 
                     language = 'en';
                 }
 
-                var promise =  $http.get('/i18n/' + language + '.json').then(function(response) {
+                var promise =  $http.get('i18n/' + language + '.json').then(function(response) {
                     return LANGUAGES;
                 });
                 return promise;
@@ -20,34 +20,34 @@ mongojhipApp.factory('LanguageService', function ($http, $translate, LANGUAGES) 
         };
     });
 
-mongojhipApp.factory('Register', function ($resource) {
+neo4jhipsterApp.factory('Register', function ($resource) {
         return $resource('app/rest/register', {}, {
         });
     });
 
-mongojhipApp.factory('Activate', function ($resource) {
+neo4jhipsterApp.factory('Activate', function ($resource) {
         return $resource('app/rest/activate', {}, {
             'get': { method: 'GET', params: {}, isArray: false}
         });
     });
 
-mongojhipApp.factory('Account', function ($resource) {
+neo4jhipsterApp.factory('Account', function ($resource) {
         return $resource('app/rest/account', {}, {
         });
     });
 
-mongojhipApp.factory('Password', function ($resource) {
+neo4jhipsterApp.factory('Password', function ($resource) {
         return $resource('app/rest/account/change_password', {}, {
         });
     });
 
-mongojhipApp.factory('Sessions', function ($resource) {
+neo4jhipsterApp.factory('Sessions', function ($resource) {
         return $resource('app/rest/account/sessions/:series', {}, {
             'get': { method: 'GET', isArray: true}
         });
     });
 
-mongojhipApp.factory('MetricsService',function ($http) {
+neo4jhipsterApp.factory('MetricsService',function ($http) {
     		return {
             get: function() {
                 var promise = $http.get('metrics/metrics').then(function(response){
@@ -58,7 +58,7 @@ mongojhipApp.factory('MetricsService',function ($http) {
         };
     });
 
-mongojhipApp.factory('ThreadDumpService', function ($http) {
+neo4jhipsterApp.factory('ThreadDumpService', function ($http) {
         return {
             dump: function() {
                 var promise = $http.get('dump').then(function(response){
@@ -69,7 +69,7 @@ mongojhipApp.factory('ThreadDumpService', function ($http) {
         };
     });
 
-mongojhipApp.factory('HealthCheckService', function ($rootScope, $http) {
+neo4jhipsterApp.factory('HealthCheckService', function ($rootScope, $http) {
         return {
             check: function() {
                 var promise = $http.get('health').then(function(response){
@@ -80,14 +80,14 @@ mongojhipApp.factory('HealthCheckService', function ($rootScope, $http) {
         };
     });
 
-mongojhipApp.factory('LogsService', function ($resource) {
+neo4jhipsterApp.factory('LogsService', function ($resource) {
         return $resource('app/rest/logs', {}, {
             'findAll': { method: 'GET', isArray: true},
             'changeLevel':  { method: 'PUT'}
         });
     });
 
-mongojhipApp.factory('AuditsService', function ($http) {
+neo4jhipsterApp.factory('AuditsService', function ($http) {
         return {
             findAll: function() {
                 var promise = $http.get('app/rest/audits/all').then(function (response) {
@@ -104,7 +104,7 @@ mongojhipApp.factory('AuditsService', function ($http) {
         }
     });
 
-mongojhipApp.factory('Session', function () {
+neo4jhipsterApp.factory('Session', function () {
         this.create = function (login, firstName, lastName, email, userRoles) {
             this.login = login;
             this.firstName = firstName;
@@ -122,7 +122,7 @@ mongojhipApp.factory('Session', function () {
         return this;
     });
 
-mongojhipApp.factory('AuthenticationSharedService', function ($rootScope, $http, authService, Session, Account) {
+neo4jhipsterApp.factory('AuthenticationSharedService', function ($rootScope, $http, authService, Session, Account) {
         return {
             login: function (param) {
                 var data ="j_username=" + encodeURIComponent(param.username) +"&j_password=" + encodeURIComponent(param.password) +"&_spring_security_remember_me=" + param.rememberMe +"&submit=Login";
@@ -151,13 +151,22 @@ mongojhipApp.factory('AuthenticationSharedService', function ($rootScope, $http,
                         Account.get(function(data) {
                             Session.create(data.login, data.firstName, data.lastName, data.email, data.roles);
                             $rootScope.account = Session;
-                            $rootScope.authenticated = true;
+                            if (!$rootScope.isAuthorized(authorizedRoles)) {
+                                // user is not allowed
+                               $rootScope.$broadcast("event:auth-notAuthorized");
+                            } else {
+                                $rootScope.$broadcast("event:auth-loginConfirmed");
+                            }
                         });
+                    }else{
+                        if (!$rootScope.isAuthorized(authorizedRoles)) {
+                                // user is not allowed
+                                $rootScope.$broadcast("event:auth-notAuthorized");
+                        } else {
+                                $rootScope.$broadcast("event:auth-loginConfirmed");
+                        }
                     }
-                    $rootScope.authenticated = !!Session.login;
                 }).error(function (data, status, headers, config) {
-                    $rootScope.authenticated = false;
-
                     if (!$rootScope.isAuthorized(authorizedRoles)) {
                         $rootScope.$broadcast('event:auth-loginRequired', data);
                     }

@@ -2,10 +2,10 @@
 
 /* App Module */
 
-var mongojhipApp = angular.module('mongojhipApp', ['http-auth-interceptor', 'tmh.dynamicLocale',
-    'ngResource', 'ngRoute', 'ngCookies', 'mongojhipAppUtils', 'pascalprecht.translate', 'truncate']);
+var neo4jhipsterApp = angular.module('neo4jhipsterApp', ['http-auth-interceptor', 'tmh.dynamicLocale',
+    'ngResource', 'ngRoute', 'ngCookies', 'neo4jhipsterAppUtils', 'pascalprecht.translate', 'truncate']);
 
-mongojhipApp
+neo4jhipsterApp
     .config(function ($routeProvider, $httpProvider, $translateProvider, tmhDynamicLocaleProvider, USER_ROLES) {
             $routeProvider
                 .when('/register', {
@@ -130,6 +130,7 @@ mongojhipApp
             
         })
         .run(function($rootScope, $location, $http, AuthenticationSharedService, Session, USER_ROLES) {
+                $rootScope.authenticated = false;
                 $rootScope.$on('$routeChangeStart', function (event, next) {
                     $rootScope.isAuthorized = AuthenticationSharedService.isAuthorized;
                     $rootScope.userRoles = USER_ROLES;

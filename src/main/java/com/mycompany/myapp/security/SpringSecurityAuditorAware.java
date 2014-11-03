@@ -1,5 +1,6 @@
 package com.mycompany.myapp.security;
 
+import com.mycompany.myapp.config.Constants;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,6 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
     public String getCurrentAuditor() {
         String userName = SecurityUtils.getCurrentLogin();
-        return (userName != null ? userName : "Constants.SYSTEM_ACCOUNT");
+        return (userName != null ? userName : Constants.SYSTEM_ACCOUNT);
     }
 }

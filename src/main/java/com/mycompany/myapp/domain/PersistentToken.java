@@ -1,10 +1,7 @@
 package com.mycompany.myapp.domain;
 
-//import java.text.SimpleDateFormat;
-import java.io.Serializable;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -16,9 +13,10 @@ import org.springframework.data.neo4j.annotation.Indexed;
 import org.springframework.data.neo4j.annotation.NodeEntity;
 import org.springframework.data.neo4j.annotation.RelatedTo;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
+import java.io.Serializable;
 
 
 /**
@@ -27,42 +25,50 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @see com.mycompany.myapp.security.CustomPersistentRememberMeServices
  */
 
-
-@SuppressWarnings("serial")
 @NodeEntity
 public class PersistentToken implements Serializable {
 
-	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("d MMMM yyyy");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("d MMMM yyyy");
 
-	private static final int MAX_USER_AGENT_LEN = 255;
-
-	
-	@GraphId
+    private static final int MAX_USER_AGENT_LEN = 255;
+    
+    @GraphId
 	Long id;
-	
-	@Indexed
-	public String series;
-	
-	@JsonIgnore
+    
+    @NotNull
+    @Indexed(unique=true)
+    private String series;
+
+    @JsonIgnore
     @NotNull
     private String tokenValue;
-   
-    @Indexed
+
+    @JsonIgnore
     private Long tokenDate;
 
     //an IPV6 address max length is 39 characters
     @Size(min = 0, max = 39)
     private String ipAddress;
-    
 
-    private String userAgent;
     
-	@JsonIgnore
+    private String userAgent;
+
+    @JsonIgnore
     @RelatedTo(type = "PERSISTENT_TOKENS", direction = Direction.OUTGOING)
 	@Fetch
     private User user;
+    
+    transient private Integer hash;
+        
+    public Long getId() {
+		return id;
+	}
 
-    public String getSeries() {
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getSeries() {
         return series;
     }
 
@@ -99,57 +105,50 @@ public class PersistentToken implements Serializable {
         this.ipAddress = ipAddress;
     }
 
-	    public String getUserAgent() {
-	        return userAgent;
-	    }
+    public String getUserAgent() {
+        return userAgent;
+    }
 
-	    public void setUserAgent(String userAgent) {
-	        if (userAgent.length() >= MAX_USER_AGENT_LEN) {
-	            this.userAgent = userAgent.substring(0, MAX_USER_AGENT_LEN - 1);
-	        } else {
-	            this.userAgent = userAgent;
-	        }
-	    }
+    public void setUserAgent(String userAgent) {
+        if (userAgent.length() >= MAX_USER_AGENT_LEN) {
+            this.userAgent = userAgent.substring(0, MAX_USER_AGENT_LEN - 1);
+        } else {
+            this.userAgent = userAgent;
+        }
+    }
 
-	    public User getUser() {
-	        return user;
-	    }
+    public User getUser() {
+        return user;
+    }
 
-	    public void setUser(User user) {
-	        this.user = user;
-	    }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	    @Override
-	    public boolean equals(Object o) {
-	        if (this == o) {
-	            return true;
-	        }
-	        if (o == null || getClass() != o.getClass()) {
-	            return false;
-	        }
+    public boolean equals(Object other) {
+        if (this == other) return true;
 
-	        PersistentToken that = (PersistentToken) o;
+        if (id == null) return false;
 
-	        if (!series.equals(that.series)) {
-	            return false;
-	        }
+        if (! (other instanceof PersistentToken)) return false;
 
-	        return true;
-	    }
+        return id.equals(((PersistentToken) other).id);
+    }
 
-	    @Override
-	    public int hashCode() {
-	        return series.hashCode();
-	    }
+    public int hashCode() {
+        if (hash == null) hash = id == null ? System.identityHashCode(this) : id.hashCode();
 
-	    @Override
-	    public String toString() {
-	        return "PersistentToken{" +
-	                "series='" + series + '\'' +
-	                ", tokenValue='" + tokenValue + '\'' +
-	                ", tokenDate=" + tokenDate +
-	                ", ipAddress='" + ipAddress + '\'' +
-	                ", userAgent='" + userAgent + '\'' +
-	                "}";
-	    }
-	}
+        return hash.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "PersistentToken{" +
+                "series='" + series + '\'' +
+                ", tokenValue='" + tokenValue + '\'' +
+                ", tokenDate=" + tokenDate +
+                ", ipAddress='" + ipAddress + '\'' +
+                ", userAgent='" + userAgent + '\'' +
+                "}";
+    }
+}

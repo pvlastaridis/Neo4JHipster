@@ -1,30 +1,26 @@
 package com.mycompany.myapp;
 
+import com.mycompany.myapp.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 
-import com.mycompany.myapp.config.Constants;
-
 /**
- * This is an helper Java class that provides an alternative to creating a
- * web.xml.
+ * This is an helper Java class that provides an alternative to creating a web.xml.
  */
 public class ApplicationWebXml extends SpringBootServletInitializer {
 
     private final Logger log = LoggerFactory.getLogger(ApplicationWebXml.class);
 
-	@Override
-	protected SpringApplicationBuilder configure(
-			SpringApplicationBuilder application) {
-	    return application.profiles(addDefaultProfile())
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.profiles(addDefaultProfile())
                 .showBanner(false)
                 .sources(Application.class);
-		
-	}
-	
-	  /**
+    }
+
+    /**
      * Set a default profile if it has not been set.
      * <p/>
      * <p>
@@ -41,5 +37,4 @@ public class ApplicationWebXml extends SpringBootServletInitializer {
         log.warn("No Spring profile configured, running with default configuration");
         return Constants.SPRING_PROFILE_DEVELOPMENT;
     }
-
 }

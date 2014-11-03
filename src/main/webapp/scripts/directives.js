@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('mongojhipApp')
+angular.module('neo4jhipsterApp')
     .directive('activeMenu', function($translate, $locale, tmhDynamicLocale) {
         return {
             restrict: 'A',

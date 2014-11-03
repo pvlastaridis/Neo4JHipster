@@ -1,6 +1,6 @@
 {
   "generator-jhipster": {
-    "baseName": "mongojhip",
+    "baseName": "Neo4JHipster",
     "packageName": "com.mycompany.myapp",
     "packageFolder": "com/mycompany/myapp",
     "authenticationType": "cookie",
