@@ -7,7 +7,7 @@ This project is based on the coolest seed app JHipster !!!!. More about it here 
 Running this example
 --------------------
 
-Make sure you have Maven and Node installed. Clone this repo and in the root directory of your clone give:
+Make sure you have Maven  and Node installed. Clone this repo and in the root directory of your clone give:
 
     bower install
     npm install
