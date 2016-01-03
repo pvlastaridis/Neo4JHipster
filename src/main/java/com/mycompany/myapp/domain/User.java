@@ -1,19 +1,15 @@
 package com.mycompany.myapp.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.hibernate.validator.constraints.Email;
-import org.neo4j.graphdb.Direction;
-import org.springframework.data.neo4j.annotation.Fetch;
-import org.springframework.data.neo4j.annotation.GraphId;
-import org.springframework.data.neo4j.annotation.Indexed;
-import org.springframework.data.neo4j.annotation.NodeEntity;
-import org.springframework.data.neo4j.annotation.RelatedTo;
+import org.neo4j.ogm.annotation.NodeEntity;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
-import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,28 +17,26 @@ import java.util.Set;
  * A user.
  */
 @NodeEntity
-public class User extends AbstractAuditingEntity implements Serializable {
+public class User extends Entity {
 
-	@GraphId
-	Long id;
-    
     @NotNull
-    @Size(min = 0, max = 50)
-    @Indexed(unique=true)
+    @Pattern(regexp = "^[a-z0-9]*$|(anonymousUser)")
+    @Size(min = 1, max = 50)
     private String login;
 
     @JsonIgnore
-    @Size(min = 0, max = 100)
+    @NotNull
+    @Size(min = 60, max = 60)
     private String password;
 
-    @Size(min = 0, max = 50)
+    @Size(max = 50)
     private String firstName;
 
-    @Size(min = 0, max = 50)
+    @Size(max = 50)
     private String lastName;
 
     @Email
-    @Size(min = 0, max = 100)
+    @Size(max = 100)
     private String email;
 
     private boolean activated = false;
@@ -50,29 +44,21 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Size(min = 2, max = 5)
     private String langKey;
 
-    @Size(min = 0, max = 20)
+    @Size(max = 20)
+    @JsonIgnore
     private String activationKey;
 
+    @Size(max = 20)
+    private String resetKey;
+
+    private Long createdDate = null;
+
+    private Long resetDate = null;
+
     @JsonIgnore
- 	@RelatedTo(direction = Direction.OUTGOING)
- 	@Fetch
- 	Set<Authority> authorities = new HashSet<Authority>();
+    private Set<Authority> authorities = new HashSet<>();
 
- 	@RelatedTo(direction = Direction.INCOMING)
- 	@Fetch
-    private Set<PersistentToken> persistentTokens = new HashSet<>(); 
- 	
-    transient private Integer hash;
-
-    public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getLogin() {
+    public String getLogin() {
         return login;
     }
 
@@ -128,6 +114,52 @@ public class User extends AbstractAuditingEntity implements Serializable {
         this.activationKey = activationKey;
     }
 
+    public String getResetKey() {
+        return resetKey;
+    }
+
+    public void setResetKey(String resetKey) {
+        this.resetKey = resetKey;
+    }
+
+    public Long getResetDate() {
+        return resetDate;
+    }
+
+    public void setResetDate(Long resetDate) {
+        this.resetDate = resetDate;
+    }
+
+    @JsonIgnore
+    public ZonedDateTime getResetDDate() {
+        Instant instant = Instant.ofEpochSecond(resetDate);
+        ZonedDateTime ldt = ZonedDateTime.ofInstant(instant, ZoneOffset.systemDefault());
+        return ldt;
+    }
+
+    public void setResetDDate(ZonedDateTime resetDate) {
+        this.resetDate = resetDate.toEpochSecond();
+    }
+
+    public Long getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Long resetDate) {
+        this.createdDate = resetDate;
+    }
+
+    @JsonIgnore
+    public ZonedDateTime getCreatedDDate() {
+        Instant instant = Instant.ofEpochMilli(createdDate);
+        ZonedDateTime ldt = ZonedDateTime.ofInstant(instant, ZoneOffset.systemDefault());
+        return ldt;
+    }
+
+    public void setCreatedDDate(ZonedDateTime resetDate) {
+        this.createdDate = resetDate.toEpochSecond();
+    }
+
     public String getLangKey() {
         return langKey;
     }
@@ -143,35 +175,17 @@ public class User extends AbstractAuditingEntity implements Serializable {
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
     }
-    
-
-    public boolean equals(Object other) {
-        if (this == other) return true;
-
-        if (id == null) return false;
-
-        if (! (other instanceof Authority)) return false;
-
-        return id.equals(((Authority) other).id);
-    }
-
-    public int hashCode() {
-        if (hash == null) hash = id == null ? System.identityHashCode(this) : id.hashCode();
-
-        return hash.hashCode();
-    }
 
     @Override
     public String toString() {
         return "User{" +
-                "login='" + login + '\'' +
-                ", password='" + password + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", activated='" + activated + '\'' +
-                ", langKey='" + langKey + '\'' +
-                ", activationKey='" + activationKey + '\'' +
-                "}";
+            "login='" + login + '\'' +
+            ", firstName='" + firstName + '\'' +
+            ", lastName='" + lastName + '\'' +
+            ", email='" + email + '\'' +
+            ", activated='" + activated + '\'' +
+            ", langKey='" + langKey + '\'' +
+            ", activationKey='" + activationKey + '\'' +
+            "}";
     }
 }

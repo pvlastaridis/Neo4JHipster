@@ -1,42 +1,28 @@
 package com.mycompany.myapp.domain;
 
-import org.springframework.data.neo4j.annotation.GraphId;
-import org.springframework.data.neo4j.annotation.NodeEntity;
+/**
+ * Used to represent a Map Property
+ * Created by Panos on 01-Jan-16.
+ */
+public class PersistentAuditEventData extends Entity{
 
-@NodeEntity
-public class PersistentAuditEventData {
-	
-	@GraphId
-	Long id;
-	
-	private String name;
+    private String name;
 
     private String value;
 
-	public Long getId() {
-		return id;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-    
-    
-
+    public void setValue(String value) {
+        this.value = value;
+    }
 }

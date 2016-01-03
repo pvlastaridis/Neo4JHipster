@@ -1,13 +1,35 @@
-// Generated on 2014-11-02 using generator-jhipster 1.6.0
+// Generated on 2016-01-01 using generator-jhipster 2.26.2
 'use strict';
+var fs = require('fs');
 
-// # Globbing
-// for performance reasons we're only matching one level down:
-// 'test/spec/{,*/}*.js'
-// use this if you want to recursively match all subfolders:
-// 'test/spec/**/*.js'
+var parseString = require('xml2js').parseString;
+// Returns the second occurence of the version number
+var parseVersionFromPomXml = function() {
+    var version;
+    var pomXml = fs.readFileSync('pom.xml', "utf8");
+    parseString(pomXml, function (err, result){
+        if (result.project.version && result.project.version[0]) {
+            version = result.project.version[0];
+        } else if (result.project.parent && result.project.parent[0] && result.project.parent[0].version && result.project.parent[0].version[0]) {
+            version = result.project.parent[0].version[0]
+        } else {
+            throw new Error('pom.xml is malformed. No version is defined');
+        }
+    });
+    return version;
+};
 
-var proxySnippet = require('grunt-connect-proxy/lib/utils').proxyRequest;
+// usemin custom step
+var useminAutoprefixer = {
+    name: 'autoprefixer',
+    createConfig: function(context, block) {
+        if(block.src.length === 0) {
+            return {};
+        } else {
+            return require('grunt-usemin/lib/config/cssmin').createConfig(context, block) // Reuse cssmins createConfig
+        }
+    }
+};
 
 module.exports = function (grunt) {
     require('load-grunt-tasks')(grunt);
@@ -20,101 +42,59 @@ module.exports = function (grunt) {
             dist: 'src/main/webapp/dist'
         },
         watch: {
-            styles: {
-                files: ['src/main/webapp/styles/**/*.css'],
-                tasks: ['copy:styles', 'autoprefixer']
+            bower: {
+                files: ['bower.json'],
+                tasks: ['wiredep']
             },
-            livereload: {
-                options: {
-                    livereload: 35729
-                },
-                files: [
-                    'src/main/webapp/**/*.html',
-                    'src/main/webapp/**/*.json',
-                    '.tmp/styles/**/*.css',
-                    '{.tmp/,}src/main/webapp/scripts/**/*.js',
-                    'src/main/webapp/images/**/*.{png,jpg,jpeg,gif,webp,svg}'
-                ]
+            ngconstant: {
+                files: ['Gruntfile.js', 'pom.xml'],
+                tasks: ['ngconstant:dev']
             }
         },
         autoprefixer: {
-            options: ['last 1 version'],
-            dist: {
-                files: [{
-                    expand: true,
-                    cwd: '.tmp/styles/',
-                    src: '**/*.css',
-                    dest: '.tmp/styles/'
-                }]
-            }
+            // src and dest is configured in a subtask called "generated" by usemin
         },
-        connect: {
-            proxies: [
-                {
-                    context: '/app',
-                    host: 'localhost',
-                    port: 8080,
-                    https: false,
-                    changeOrigin: false
-                },
-                {
-                    context: '/metrics',
-                    host: 'localhost',
-                    port: 8080,
-                    https: false,
-                    changeOrigin: false
-                },
-                {
-                context: '/dump',
-                host: 'localhost',
-                port: 8080,
-                https: false,
-                changeOrigin: false
-                },
-                {
-                context: '/api-docs',
-                host: 'localhost',
-                port: 8080,
-                https: false,
-                changeOrigin: false
-                }
-            ],
-            options: {
-                port: 9000,
-                // Change this to 'localhost' to deny access to the server from outside.
-                hostname: '0.0.0.0',
-                livereload: 35729
-            },
-            livereload: {
-                options: {
-                    open: true,
-                    base: [
-                        '.tmp',
-                        'src/main/webapp'
-                    ],
-                    middleware: function (connect) {
-                        return [
-                            proxySnippet,
-                            connect.static('.tmp'),
-                            connect.static('src/main/webapp')
-                        ];
-                    }
-                }
+        wiredep: {
+            app: {
+                src: ['src/main/webapp/index.html'],
+                exclude: [
+                    /angular-i18n/  // localizations are loaded dynamically
+                ]
             },
             test: {
-                options: {
-                 port: 9001,
-                    base: [
-                        '.tmp',
-                        'test',
-                        'src/main/webapp'
+                src: 'src/test/javascript/karma.conf.js',
+                exclude: [/angular-i18n/, /angular-scenario/],
+                ignorePath: /\.\.\/\.\.\//, // remove ../../ from paths of injected javascripts
+                devDependencies: true,
+                fileTypes: {
+                    js: {
+                        block: /(([\s\t]*)\/\/\s*bower:*(\S*))(\n|\r|.)*?(\/\/\s*endbower)/gi,
+                        detect: {
+                            js: /'(.*\.js)'/gi
+                        },
+                        replace: {
+                            js: '\'{{filePath}}\','
+                        }
+                    }
+                }
+            }
+        },
+        browserSync: {
+            dev: {
+                bsFiles: {
+                    src : [
+                        'src/main/webapp/**/*.html',
+                        'src/main/webapp/**/*.json',
+                        'src/main/webapp/assets/styles/**/*.css',
+                        'src/main/webapp/scripts/**/*.{js,html}',
+                        'src/main/webapp/assets/images/**/*.{png,jpg,jpeg,gif,webp,svg}',
+                        'tmp/**/*.{css,js}'
                     ]
                 }
             },
-            dist: {
-                options: {
-                    base: '<%= yeoman.dist %>'
-                }
+            options: {
+                watchTask: true,
+                proxy: "localhost:8080"
             }
         },
         clean: {
@@ -136,46 +116,25 @@ module.exports = function (grunt) {
             },
             all: [
                 'Gruntfile.js',
-                'src/main/webapp/scripts/{,*/}*.js'
+                'src/main/webapp/scripts/app.js',
+                'src/main/webapp/scripts/app/**/*.js',
+                'src/main/webapp/scripts/components/**/*.js'
             ]
         },
-        coffee: {
-            options: {
-                sourceMap: true,
-                sourceRoot: ''
-            },
-            dist: {
-                files: [{
-                    expand: true,
-                    cwd: 'src/main/webapp/scripts',
-                    src: '**/*.coffee',
-                    dest: '.tmp/scripts',
-                    ext: '.js'
-                }]
-            },
-            test: {
-                files: [{
-                    expand: true,
-                    cwd: 'test/spec',
-                    src: '**/*.coffee',
-                    dest: '.tmp/spec',
-                    ext: '.js'
-                }]
-            }
+        concat: {
+            // src and dest is configured in a subtask called "generated" by usemin
         },
-        // not used since Uglify task does concat,
-        // but still available if needed
-        /*concat: {
-            dist: {}
-        },*/
+        uglifyjs: {
+            // src and dest is configured in a subtask called "generated" by usemin
+        },
         rev: {
             dist: {
                 files: {
                     src: [
                         '<%= yeoman.dist %>/scripts/**/*.js',
-                        '<%= yeoman.dist %>/styles/**/*.css',
-                        '<%= yeoman.dist %>/images/**/*.{png,jpg,jpeg,gif,webp,svg}',
-                        '<%= yeoman.dist %>/fonts/*'
+                        '<%= yeoman.dist %>/assets/styles/**/*.css',
+                        '<%= yeoman.dist %>/assets/images/**/*.{png,jpg,jpeg,gif,webp,svg}',
+                        '<%= yeoman.dist %>/assets/fonts/*'
                     ]
                 }
             }
@@ -183,14 +142,29 @@ module.exports = function (grunt) {
         useminPrepare: {
             html: 'src/main/webapp/**/*.html',
             options: {
-                dest: '<%= yeoman.dist %>'
+                dest: '<%= yeoman.dist %>',
+                flow: {
+                    html: {
+                        steps: {
+                            js: ['concat', 'uglifyjs'],
+                            css: ['cssmin', useminAutoprefixer] // Let cssmin concat files so it corrects relative paths to fonts and images
+                        },
+                            post: {}
+                        }
+                    }
             }
         },
         usemin: {
             html: ['<%= yeoman.dist %>/**/*.html'],
-            css: ['<%= yeoman.dist %>/styles/**/*.css'],
+            css: ['<%= yeoman.dist %>/assets/styles/**/*.css'],
+            js: ['<%= yeoman.dist %>/scripts/**/*.js'],
             options: {
-                assetsDirs: ['<%= yeoman.dist %>/**/'],
+                assetsDirs: ['<%= yeoman.dist %>', '<%= yeoman.dist %>/assets/styles', '<%= yeoman.dist %>/assets/images', '<%= yeoman.dist %>/assets/fonts'],
+                patterns: {
+                    js: [
+                        [/(assets\/images\/.*?\.(?:gif|jpeg|jpg|png|webp|svg))/gm, 'Update the JS to reference our revved images']
+                    ]
+                },
                 dirs: ['<%= yeoman.dist %>']
             }
         },
@@ -198,9 +172,9 @@ module.exports = function (grunt) {
             dist: {
                 files: [{
                     expand: true,
-                    cwd: 'src/main/webapp/images',
-                src: '**/*.{jpg,jpeg}', // we don't optimize PNG files as it doesn't work on Linux. If you are not on Linux, feel free to use '{,*/}*.{png,jpg,jpeg}'
-                    dest: '<%= yeoman.dist %>/images'
+                    cwd: 'src/main/webapp/assets/images',
+                    src: '**/*.{jpg,jpeg}', // we don't optimize PNG files as it doesn't work on Linux. If you are not on Linux, feel free to use '**/*.{png,jpg,jpeg}'
+                    dest: '<%= yeoman.dist %>/assets/images'
                 }]
             }
         },
@@ -208,24 +182,26 @@ module.exports = function (grunt) {
             dist: {
                 files: [{
                     expand: true,
-                    cwd: 'src/main/webapp/images',
+                    cwd: 'src/main/webapp/assets/images',
                     src: '**/*.svg',
-                    dest: '<%= yeoman.dist %>/images'
+                    dest: '<%= yeoman.dist %>/assets/images'
                 }]
             }
         },
         cssmin: {
-            // By default, your `index.html` <!-- Usemin Block --> will take care of
-            // minification. This option is pre-configured if you do not wish to use
-            // Usemin blocks.
-            // dist: {
-            //     files: {
-            //         '<%= yeoman.dist %>/styles/main.css': [
-            //             '.tmp/styles/{,*/}*.css',
-            //             'styles/{,*/}*.css'
-            //         ]
-            //     }
-            // }
+            // src and dest is configured in a subtask called "generated" by usemin
+        },
+        ngtemplates:    {
+            dist: {
+                cwd: 'src/main/webapp',
+                src: ['scripts/app/**/*.html', 'scripts/components/**/*.html',],
+                dest: '.tmp/templates/templates.js',
+                options: {
+                    module: 'mongohipsterApp',
+                    usemin: 'scripts/app.js',
+                    htmlmin: '<%= htmlmin.dist.options %>'
+                }
+            }
         },
         htmlmin: {
             dist: {
@@ -238,18 +214,31 @@ module.exports = function (grunt) {
                     removeAttributeQuotes: true,
                     removeRedundantAttributes: true,
                     useShortDoctype: true,
-                    removeEmptyAttributes: true
+                    removeEmptyAttributes: true,
+                    keepClosingSlash: true
                 },
                 files: [{
                     expand: true,
                     cwd: '<%= yeoman.dist %>',
-                    src: ['*.html', 'views/**/*.html'],
+                    src: ['*.html'],
                     dest: '<%= yeoman.dist %>'
                 }]
             }
         },
         // Put files not handled in other tasks here
         copy: {
+            fonts: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    flatten: true,
+                    cwd: 'src/main/webapp',
+                    dest: '<%= yeoman.dist %>/assets/fonts',
+                    src: [
+                      'bower_components/bootstrap/fonts/*.*'
+                    ]
+                }]
+            },
             dist: {
                 files: [{
                     expand: true,
@@ -258,32 +247,18 @@ module.exports = function (grunt) {
                     dest: '<%= yeoman.dist %>',
                     src: [
                         '*.html',
-                        'views/*.html',
-                        'images/**/*.{png,gif,webp}',
-                        'fonts/*'
+                        'scripts/**/*.html',
+                        'assets/images/**/*.{png,gif,webp,jpg,jpeg,svg}',
+                        'assets/fonts/*'
                     ]
                 }, {
                     expand: true,
-                    cwd: '.tmp/images',
-                    dest: '<%= yeoman.dist %>/images',
+                    cwd: '.tmp/assets/images',
+                    dest: '<%= yeoman.dist %>/assets/images',
                     src: [
                         'generated/*'
                     ]
                 }]
-            },
-            styles: {
-                expand: true,
-                cwd: 'src/main/webapp/styles',
-                dest: '.tmp/styles/',
-                src: '{,*/}*.css'
-            },
-            generateHerokuDirectory: {
-                    expand: true,
-                    dest: 'deploy/heroku',
-                    src: [
-                        'pom.xml',
-                        'src/main/**'
-                ]
             },
             generateOpenshiftDirectory: {
                     expand: true,
@@ -294,28 +269,10 @@ module.exports = function (grunt) {
                 ]
             }
         },
-        concurrent: {
-            server: [
-                'copy:styles'
-            ],
-            test: [
-                'copy:styles'
-            ],
-            dist: [
-                'copy:styles',
-                'imagemin',
-                'svgmin'
-            ]
-        },
         karma: {
             unit: {
                 configFile: 'src/test/javascript/karma.conf.js',
                 singleRun: true
-            }
-        },
-        cdnify: {
-            dist: {
-                html: ['<%= yeoman.dist %>/*.html']
             }
         },
         ngAnnotate: {
@@ -328,38 +285,12 @@ module.exports = function (grunt) {
                 }]
             }
         },
-        replace: {
-            dist: {
-                src: ['<%= yeoman.dist %>/index.html'],
-                    overwrite: true,                                 // overwrite matched source files
-                    replacements: [{
-                        from: '<div class="development"></div>',
-                        to: ''
-                    }]
-                }
-            },
-        uglify: {
-            dist: {
-                files: {
-                    '<%= yeoman.dist %>/scripts/scripts.js': [
-                        '<%= yeoman.dist %>/scripts/scripts.js'
-                    ]
-                }
-            }
-        },
         buildcontrol: {
             options: {
                 commit: true,
                 push: false,
                 connectCommits: false,
                 message: 'Built %sourceName% from commit %sourceCommit% on branch %sourceBranch%'
-            },
-            heroku: {
-                options: {
-                    dir: 'deploy/heroku',
-                    remote: 'heroku',
-                    branch: 'master'
-                }
             },
             openshift: {
                 options: {
@@ -369,58 +300,71 @@ module.exports = function (grunt) {
                 }
             }
         },
+        ngconstant: {
+            options: {
+                name: 'mongohipsterApp',
+                deps: false,
+                wrap: '"use strict";\n// DO NOT EDIT THIS FILE, EDIT THE GRUNT TASK NGCONSTANT SETTINGS INSTEAD WHICH GENERATES THIS FILE\n{%= __ngModule %}'
+            },
+            dev: {
+                options: {
+                    dest: 'src/main/webapp/scripts/app/app.constants.js'
+                },
+                constants: {
+                    ENV: 'dev',
+                    VERSION: parseVersionFromPomXml()
+                }
+            },
+            prod: {
+                options: {
+                    dest: '.tmp/scripts/app/app.constants.js'
+                },
+                constants: {
+                    ENV: 'prod',
+                    VERSION: parseVersionFromPomXml()
+                }
+            }
+        }
     });
 
-    grunt.registerTask('server', function (target) {
-        if (target === 'dist') {
-            return grunt.task.run(['build', 'connect:dist:keepalive']);
-        }
+    grunt.registerTask('serve', [
+        'clean:server',
+        'wiredep',
+        'ngconstant:dev',
+        'browserSync',
+        'watch'
+    ]);
 
-        grunt.task.run([
-            'clean:server',
-            'concurrent:server',
-            'autoprefixer',
-            'configureProxies',
-            'connect:livereload',
-            'watch'
-        ]);
+    grunt.registerTask('server', function (target) {
+        grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
+        grunt.task.run([target ? ('serve:' + target) : 'serve']);
     });
 
     grunt.registerTask('test', [
         'clean:server',
-        'concurrent:test',
-        'autoprefixer',
-        'connect:test',
+        'wiredep:test',
+        'ngconstant:dev',
         'karma'
     ]);
 
     grunt.registerTask('build', [
         'clean:dist',
+        'wiredep:app',
+        'ngconstant:prod',
         'useminPrepare',
-        'concurrent:dist',
-        'autoprefixer',
+        'ngtemplates',
+        'imagemin',
+        'svgmin',
         'concat',
+        'copy:fonts',
         'copy:dist',
         'ngAnnotate',
         'cssmin',
-        'replace',
+        'autoprefixer',
         'uglify',
         'rev',
         'usemin',
         'htmlmin'
-    ]);
-
-    grunt.registerTask('buildHeroku', [
-        'test',
-        'build',
-        'copy:generateHerokuDirectory',
-    ]);
-
-    grunt.registerTask('deployHeroku', [
-        'test',
-        'build',
-        'copy:generateHerokuDirectory',
-        'buildcontrol:heroku'
     ]);
 
     grunt.registerTask('buildOpenshift', [
@@ -436,8 +380,6 @@ module.exports = function (grunt) {
         'buildcontrol:openshift'
     ]);
 
-    grunt.registerTask('default', [
-        'test',
-        'build'
-    ]);
+    
+    grunt.registerTask('default', ['serve']);
 };

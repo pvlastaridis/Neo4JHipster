@@ -10,7 +10,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 public class ExceptionHandlingAsyncTaskExecutor implements AsyncTaskExecutor,
-        InitializingBean, DisposableBean {
+    InitializingBean, DisposableBean {
 
     private final Logger log = LoggerFactory.getLogger(ExceptionHandlingAsyncTaskExecutor.class);
 
@@ -31,30 +31,22 @@ public class ExceptionHandlingAsyncTaskExecutor implements AsyncTaskExecutor,
     }
 
     private <T> Callable<T> createCallable(final Callable<T> task) {
-        return new Callable<T>() {
-
-            @Override
-            public T call() throws Exception {
-                try {
-                    return task.call();
-                } catch (Exception e) {
-                    handle(e);
-                    throw e;
-                }
+        return () -> {
+            try {
+                return task.call();
+            } catch (Exception e) {
+                handle(e);
+                throw e;
             }
         };
     }
 
     private Runnable createWrappedRunnable(final Runnable task) {
-        return new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    task.run();
-                } catch (Exception e) {
-                    handle(e);
-                }
+        return () -> {
+            try {
+                task.run();
+            } catch (Exception e) {
+                handle(e);
             }
         };
     }

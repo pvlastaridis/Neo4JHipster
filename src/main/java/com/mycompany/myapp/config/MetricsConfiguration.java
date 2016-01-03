@@ -8,14 +8,11 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.*;
 import com.ryantenney.metrics.spring.config.annotation.EnableMetrics;
 import com.ryantenney.metrics.spring.config.annotation.MetricsConfigurerAdapter;
+import fr.ippon.spark.metrics.SparkReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -25,14 +22,9 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableMetrics(proxyTargetClass = true)
-public class MetricsConfiguration extends MetricsConfigurerAdapter implements EnvironmentAware {
+@Profile("!" + Constants.SPRING_PROFILE_FAST)
+public class MetricsConfiguration extends MetricsConfigurerAdapter {
 
-    private static final String ENV_METRICS = "metrics.";
-    private static final String ENV_METRICS_GRAPHITE = "metrics.graphite.";
-    private static final String PROP_JMX_ENABLED = "jmx.enabled";
-    private static final String PROP_GRAPHITE_ENABLED = "enabled";
-    private static final String PROP_PORT = "port";
-    private static final String PROP_HOST = "host";
     private static final String PROP_METRIC_REG_JVM_MEMORY = "jvm.memory";
     private static final String PROP_METRIC_REG_JVM_GARBAGE = "jvm.garbage";
     private static final String PROP_METRIC_REG_JVM_THREADS = "jvm.threads";
@@ -41,73 +33,95 @@ public class MetricsConfiguration extends MetricsConfigurerAdapter implements En
 
     private final Logger log = LoggerFactory.getLogger(MetricsConfiguration.class);
 
-    private static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
+    private MetricRegistry metricRegistry = new MetricRegistry();
 
-    private static final HealthCheckRegistry HEALTH_CHECK_REGISTRY = new HealthCheckRegistry();
+    private HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
 
-    private RelaxedPropertyResolver propertyResolver;
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.propertyResolver = new RelaxedPropertyResolver(environment, ENV_METRICS);
-    }
+    @Inject
+    private JHipsterProperties jHipsterProperties;
 
     @Override
     @Bean
     public MetricRegistry getMetricRegistry() {
-        return METRIC_REGISTRY;
+        return metricRegistry;
     }
 
     @Override
     @Bean
     public HealthCheckRegistry getHealthCheckRegistry() {
-        return HEALTH_CHECK_REGISTRY;
+        return healthCheckRegistry;
     }
 
     @PostConstruct
     public void init() {
         log.debug("Registering JVM gauges");
-        METRIC_REGISTRY.register(PROP_METRIC_REG_JVM_MEMORY, new MemoryUsageGaugeSet());
-        METRIC_REGISTRY.register(PROP_METRIC_REG_JVM_GARBAGE, new GarbageCollectorMetricSet());
-        METRIC_REGISTRY.register(PROP_METRIC_REG_JVM_THREADS, new ThreadStatesGaugeSet());
-        METRIC_REGISTRY.register(PROP_METRIC_REG_JVM_FILES, new FileDescriptorRatioGauge());
-        METRIC_REGISTRY.register(PROP_METRIC_REG_JVM_BUFFERS, new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
-        if (propertyResolver.getProperty(PROP_JMX_ENABLED, Boolean.class, false)) {
-            log.info("Initializing Metrics JMX reporting");
-            final JmxReporter jmxReporter = JmxReporter.forRegistry(METRIC_REGISTRY).build();
+        metricRegistry.register(PROP_METRIC_REG_JVM_MEMORY, new MemoryUsageGaugeSet());
+        metricRegistry.register(PROP_METRIC_REG_JVM_GARBAGE, new GarbageCollectorMetricSet());
+        metricRegistry.register(PROP_METRIC_REG_JVM_THREADS, new ThreadStatesGaugeSet());
+        metricRegistry.register(PROP_METRIC_REG_JVM_FILES, new FileDescriptorRatioGauge());
+        metricRegistry.register(PROP_METRIC_REG_JVM_BUFFERS, new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
+        if (jHipsterProperties.getMetrics().getJmx().isEnabled()) {
+            log.debug("Initializing Metrics JMX reporting");
+            JmxReporter jmxReporter = JmxReporter.forRegistry(metricRegistry).build();
             jmxReporter.start();
         }
     }
 
     @Configuration
     @ConditionalOnClass(Graphite.class)
-    public static class GraphiteRegistry implements EnvironmentAware {
+    @Profile("!" + Constants.SPRING_PROFILE_FAST)
+    public static class GraphiteRegistry {
 
         private final Logger log = LoggerFactory.getLogger(GraphiteRegistry.class);
 
         @Inject
         private MetricRegistry metricRegistry;
 
-        private RelaxedPropertyResolver propertyResolver;
-
-        @Override
-        public void setEnvironment(Environment environment) {
-            this.propertyResolver = new RelaxedPropertyResolver(environment, ENV_METRICS_GRAPHITE);
-        }
+        @Inject
+        private JHipsterProperties jHipsterProperties;
 
         @PostConstruct
         private void init() {
-            Boolean graphiteEnabled = propertyResolver.getProperty(PROP_GRAPHITE_ENABLED, Boolean.class, false);
-            if (graphiteEnabled) {
+            if (jHipsterProperties.getMetrics().getGraphite().isEnabled()) {
                 log.info("Initializing Metrics Graphite reporting");
-                String graphiteHost = propertyResolver.getRequiredProperty(PROP_HOST);
-                Integer graphitePort = propertyResolver.getRequiredProperty(PROP_PORT, Integer.class);
+                String graphiteHost = jHipsterProperties.getMetrics().getGraphite().getHost();
+                Integer graphitePort = jHipsterProperties.getMetrics().getGraphite().getPort();
+                String graphitePrefix = jHipsterProperties.getMetrics().getGraphite().getPrefix();
                 Graphite graphite = new Graphite(new InetSocketAddress(graphiteHost, graphitePort));
                 GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry(metricRegistry)
-                        .convertRatesTo(TimeUnit.SECONDS)
-                        .convertDurationsTo(TimeUnit.MILLISECONDS)
-                        .build(graphite);
+                    .convertRatesTo(TimeUnit.SECONDS)
+                    .convertDurationsTo(TimeUnit.MILLISECONDS)
+                    .prefixedWith(graphitePrefix)
+                    .build(graphite);
                 graphiteReporter.start(1, TimeUnit.MINUTES);
+            }
+        }
+    }
+
+    @Configuration
+    @ConditionalOnClass(SparkReporter.class)
+    @Profile("!" + Constants.SPRING_PROFILE_FAST)
+    public static class SparkRegistry {
+
+        private final Logger log = LoggerFactory.getLogger(SparkRegistry.class);
+
+        @Inject
+        private MetricRegistry metricRegistry;
+
+        @Inject
+        private JHipsterProperties jHipsterProperties;
+
+        @PostConstruct
+        private void init() {
+            if (jHipsterProperties.getMetrics().getSpark().isEnabled()) {
+                log.info("Initializing Metrics Spark reporting");
+                String sparkHost = jHipsterProperties.getMetrics().getSpark().getHost();
+                Integer sparkPort = jHipsterProperties.getMetrics().getSpark().getPort();
+                SparkReporter sparkReporter = SparkReporter.forRegistry(metricRegistry)
+                    .convertRatesTo(TimeUnit.SECONDS)
+                    .convertDurationsTo(TimeUnit.MILLISECONDS)
+                    .build(sparkHost, sparkPort);
+                sparkReporter.start(1, TimeUnit.MINUTES);
             }
         }
     }
